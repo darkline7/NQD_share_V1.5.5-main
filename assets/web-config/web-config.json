@@ -1,0 +1,90 @@
+{
+    "prObjects":  [
+                      {
+                          "ten":  "Phạm Văn Tám",
+                          "idZalo":  "-1",
+                          "noiDung":  "Autosend Tổng",
+                          "hinhAnh":  [
+                                          "dqtbot.jpg"
+                                      ],
+                          "video":  [
+
+                                    ],
+                          "link":  {
+
+                                   },
+                          "thoiGianGui":  [
+                                              "03:00",
+                                              "05:00",
+                                              "08:00",
+                                              "10:00",
+                                              "13:00",
+                                              "14:40",
+                                              "16:00",
+                                              "19:00",
+                                              "22:00"
+                                          ],
+                          "customContent":  {
+                                                "6206209960966272896":  {
+                                                                            "noiDung":  "Key vàng Không phải admin game mọi vấn đề liên quan đến game vui lòng ib key bạc Ngojc",
+                                                                            "hinhAnh":  [
+
+                                                                                        ],
+                                                                            "video":  [
+
+                                                                                      ]
+                                                                        },
+                                                "4373007278127828240":  {
+                                                                            "noiDung":  "",
+                                                                            "hinhAnh":  [
+
+                                                                                        ],
+                                                                            "video":  [
+
+                                                                                      ]
+                                                                        }
+                                            }
+                      }
+                  ],
+    "selectedGroups":  {
+                           "9054378109053611543":  {
+                                                       "name":  "Lý Đức, Thanh Bình, Okashi🪐🩹"
+                                                   }
+                       },
+    "selectedFriends":  {
+
+                        },
+    "runtimeControls":  {
+                            "mediaQueue":  {
+                                               "enabled":  true,
+                                               "maxConcurrentPerGroup":  1,
+                                               "maxPendingPerGroup":  25,
+                                               "acquireTimeoutMs":  120000
+                                           },
+                            "circuitBreaker":  {
+                                                   "enabled":  true,
+                                                   "failureThreshold":  4,
+                                                   "successThreshold":  2,
+                                                   "openTimeoutMs":  45000
+                                               }
+                        },
+    "cloudflareAI":  {
+                         "enabled":  false,
+                         "accountId":  "",
+                         "apiToken":  "",
+                         "model":  "@cf/meta/llama-3.1-8b-instruct",
+                         "systemPrompt":  "Bạn là bot trợ lý tiếng Việt của Thanh Bình. Trả lời ngắn gọn, chính xác, lịch sự.",
+                         "temperature":  0.7,
+                         "maxTokens":  1024
+                     },
+    "groqAI":  {
+                   "model":  "llama-3.1-8b-instant",
+                   "systemPrompt":  "Bạn là bot Zalo trong nhóm chat của Thanh Bình. Nói chuyện tiếng Việt kiểu lầy, hổ báo nhẹ, tự tin, cà khịa vui vừa đủ, có chất anh em trong nhóm. Trả lời ngắn 1-2 câu, tự nhiên như người thật, không văn mẫu, không mở đầu bằng \"là AI\" hay \"mình là bot\" trừ khi bị hỏi trực tiếp. Có thể trêu nhẹ nhưng không xúc phạm nặng, không chửi tục quá đà, không gây war. Nếu người dùng hỏi cách tạo sticker thì hướng dẫn reply ảnh/video rồi dùng /sticker hoặc /stk. Nếu không biết thì nói thẳng, đừng bịa.",
+                   "temperature":  0.9,
+                   "maxTokens":  180,
+                   "cooldownMs":  8000,
+                   "replyMode":  "all",
+                   "enabled":  false,
+                   "apiKey":  "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"
+               }
+}

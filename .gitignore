@@ -1,0 +1,8 @@
+node_modules/
+logs/
+temp/
+.cleanup_backup_*/
+.agents/
+*.log
+*.err.log
+*.out.log

@@ -1,0 +1,682 @@
+{
+    "prefix":  "/",
+    "commands":  [
+                     {
+                         "name":  "help",
+                         "description":  "Hiển thị danh sách lệnh thành viên được dùng",
+                         "syntax":  "{p}help",
+                         "permission":  "all",
+                         "countdown":  5,
+                         "icon":  "📚",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "ai",
+                         "description":  "Hỏi AI bằng Groq",
+                         "syntax":  "{p}ai [câu hỏi]",
+                         "permission":  "all",
+                         "countdown":  10,
+                         "icon":  "🤖",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "info",
+                         "description":  "Xem thông tin chi tiết tài khoản Zalo của bạn hoặc người được tag",
+                         "syntax":  "{p}info || {p}info [@người_tag]",
+                         "permission":  "all",
+                         "countdown":  5,
+                         "icon":  "📰",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true,
+                         "alias":  [
+                                       "i4"
+                                   ]
+                     },
+                     {
+                         "name":  "card",
+                         "description":  "Tạo danh thiếp Zalo của bạn hoặc người được tag",
+                         "syntax":  "{p}card || {p}card [@người_tag]",
+                         "permission":  "all",
+                         "countdown":  5,
+                         "icon":  "🔖",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "group",
+                         "alias":  [
+                                       "gr"
+                                   ],
+                         "description":  "Xem thông tin chi tiết về nhóm/cộng đồng hiện tại",
+                         "syntax":  "{p}group",
+                         "permission":  "all",
+                         "countdown":  1,
+                         "icon":  "📋",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "detail",
+                         "alias":  [
+                                       "uptime"
+                                   ],
+                         "description":  "Xem thông tin chi tiết về bot (phiên bản, tính năng, v.v)",
+                         "syntax":  "{p}detail",
+                         "permission":  "all",
+                         "countdown":  1,
+                         "icon":  "🔧",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "speedtest",
+                         "alias":  [
+                                       "spdt"
+                                   ],
+                         "description":  "Kiểm tra tốc độ mạng của bạn",
+                         "syntax":  "{p}speedtest",
+                         "permission":  "all",
+                         "countdown":  60,
+                         "icon":  "🔧",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "sticker",
+                         "description":  "Chuyển đổi hình ảnh thành sticker Zalo",
+                         "syntax":  "{p}sticker \u003ccần reply tin nhắn\u003e",
+                         "permission":  "all",
+                         "countdown":  10,
+                         "icon":  "🏆",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true,
+                         "alias":  [
+                                       "stk"
+                                   ]
+                     },
+                     {
+                         "name":  "soundcloud",
+                         "alias":  [
+                                       "scl",
+                                       "ms",
+                                       "music"
+                                   ],
+                         "description":  "Tìm và tải 1 bài hát (nhạc) từ SoundCloud theo yêu cầu",
+                         "syntax":  "{p}soundcloud \u003ctừ khóa\u003e(\u0026\u0026số lượng kết quả)",
+                         "permission":  "all",
+                         "countdown":  30,
+                         "icon":  "🔊",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "voice",
+                         "description":  "Chuyển văn bản thành giọng nói",
+                         "syntax":  "{p}voice \u003cnội dung cần chuyển\u003e",
+                         "permission":  "all",
+                         "countdown":  5,
+                         "icon":  "🔊",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "manager",
+                         "description":  "Xem toàn bộ danh sách lệnh admin",
+                         "syntax":  "{p}manager",
+                         "permission":  "adminBox",
+                         "countdown":  5,
+                         "icon":  "🔧",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "listmute",
+                         "description":  "Xem danh sách mute",
+                         "syntax":  "{p}listmute",
+                         "permission":  "adminBox",
+                         "countdown":  1,
+                         "icon":  "🔖",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "settinggroup",
+                         "alias":  [
+                                       "stg"
+                                   ],
+                         "description":  "Sửa đổi cài đặt nhóm",
+                         "syntax":  "{p}settinggroup \u003cloại cài đặt\u003e \u003cgiá trị on|off|0|1\u003e",
+                         "permission":  "adminBox",
+                         "countdown":  0,
+                         "icon":  "🔖",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "changelink",
+                         "description":  "Đổi link nhóm ngẫu nhiên",
+                         "syntax":  "{p}changelink",
+                         "permission":  "adminBox",
+                         "countdown":  0,
+                         "icon":  "🔖",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "listadmin",
+                         "description":  "Xem danh sách admin bot nhóm",
+                         "syntax":  "{p}listadmin",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🔖",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "add",
+                         "description":  "Thêm người tag vào admin bot nhóm",
+                         "syntax":  "{p}add \u003c@người_tag\u003e",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔖",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "remove",
+                         "description":  "Xóa người tag vào admin bot nhóm",
+                         "syntax":  "{p}remove \u003c@người_tag\u003e",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔖",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "setcmd",
+                         "description":  "Quản lý cài đặt lệnh bot (bật/tắt, phân quyền, thời gian chờ)",
+                         "syntax":  "{p}setcmd [on/off/p/cd] [tên_lệnh] [đối số]",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "⚙️",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "mute",
+                         "description":  "Mute thành viên (Yêu cầu bot quyền hạn phó cộng đồng trở lên)",
+                         "syntax":  "{p}mute \u003c@người_tag\u003e",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🔇",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "unmute",
+                         "description":  "Unmute thành viên",
+                         "syntax":  "{p}unmute \u003c@người_tag\u003e",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🔊",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "prefix",
+                         "description":  "Xem hoặc thay đổi prefix của bot",
+                         "syntax":  "prefix \u003cprefix_mới\u003e",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "⚙️",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "sendtask",
+                         "description":  "Tắt bật chức năng gửi nội dung tự động sau mỗi giờ vào nhóm",
+                         "syntax":  "{p}sendtask [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "⚙️",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "autosend",
+                         "alias":  [
+                                       "as"
+                                   ],
+                         "description":  "Tự động gửi lại tin nhắn đã reply theo chu kỳ (hỗ trợ text + ảnh/video/link)",
+                         "syntax":  "{p}autosend \u003c1p|30s|2h\u003e (reply tin nhắn) || {p}autosend on \u003c1p|30s|2h\u003e || {p}autosend off || {p}autosend status",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🔁",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "welcome",
+                         "description":  "Chào mừng thành viên mới",
+                         "syntax":  "{p}welcome [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "👋",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "bye",
+                         "description":  "Tạm biệt thành viên rời nhóm",
+                         "syntax":  "{p}bye [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "👋",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "antibadword",
+                         "alias":  [
+                                       "atbw",
+                                       "loctu",
+                                       "loctukhoa",
+                                       "loctk"
+                                   ],
+                         "description":  "Lọc từ không phù hợp",
+                         "syntax":  "{p}antibadword [on|off|list] || {p}antibadword \u003cadd|remove\u003e \u003ctừ_cấm\u003e || {p}antibadword \u003cshow\u003e \u003c@người_tag\u003e",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🚫",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "antilink",
+                         "alias":  [
+                                       "xoalink",
+                                       "loclink"
+                                   ],
+                         "description":  "Quản lý chặn liên kết theo domain, whitelist và kiểm tra chính sách link",
+                         "syntax":  "{p}antilink on [domain] || {p}antilink allow \u003cd1,d2\u003e || {p}antilink allow add \u003cd1,d2\u003e || {p}antilink allow remove \u003cd1,d2\u003e || {p}antilink allow show || {p}antilink allow clear || {p}antilink vip \u003cdomain\u003e || {p}antilink test \u003clink\u003e || {p}antilink list || {p}antilink off || {p}antilink status",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🔗",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "antispam",
+                         "alias":  [
+                                       "xoaspam"
+                                   ],
+                         "description":  "Chống spam tin nhắn",
+                         "syntax":  "{p}antispam [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "⛔",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "antinude",
+                         "alias":  [
+                                       "chongnude"
+                                   ],
+                         "description":  "Chặn hình ảnh có nội dung nhạy cảm",
+                         "syntax":  "{p}antinude [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "⛔",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "antiundo",
+                         "alias":  [
+                                       "chongundo"
+                                   ],
+                         "description":  "Chống thu hồi tin nhắn",
+                         "syntax":  "{p}antiundo [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "⛔",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "onlytext",
+                         "alias":  [
+                                       "vanban"
+                                   ],
+                         "description":  "Chỉ nhắn tin văn bản",
+                         "syntax":  "{p}onlytext [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🅰",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "approve",
+                         "alias":  [
+                                       "duyetmem"
+                                   ],
+                         "description":  "Bật/tắt tự động phê duyệt thành viên mới",
+                         "syntax":  "{p}approve [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "✅",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "learn",
+                         "description":  "Bật theo dõi và học câu trả lời mới cho bot",
+                         "syntax":  "{p}learn [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "✅",
+                         "type":  2,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "learnnow",
+                         "description":  "Học câu trả lời mới cho bot ngay lập tức",
+                         "syntax":  "{p}learnnow \u003ccâu hỏi\u003e_\u003ccâu trả lời\u003e",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "✅",
+                         "type":  2,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "unlearn",
+                         "description":  "Hủy bỏ câu trả lời mà bot đã học",
+                         "syntax":  "{p}unlearn \u003ccâu trả lời\u003e",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "✅",
+                         "type":  2,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "reply",
+                         "description":  "Bật/tắt tự động trả lời tin nhắn",
+                         "syntax":  "{p}reply [on|off]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "✅",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "undo",
+                         "description":  "Undo tin nhắn bot",
+                         "syntax":  "{p}undo (Tag vào tin nhắn cần undo)",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🔙",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "todo",
+                         "description":  "Giao việc cho người khác",
+                         "syntax":  "{p}todo \u003cnội_dung_việc\u003e_[số lần]_\u003c@người_tag\u003e",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🔖",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "kick",
+                         "alias":  [
+                                       "sut",
+                                       "da"
+                                   ],
+                         "description":  "Kick thành viên",
+                         "syntax":  "{p}kick \u003c@người_tag\u003e",
+                         "permission":  "adminBox",
+                         "countdown":  1,
+                         "icon":  "👢",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "block",
+                         "alias":  [
+                                       "chan"
+                                   ],
+                         "description":  "Chặn thành viên",
+                         "syntax":  "{p}block \u003c@người_tag\u003e",
+                         "permission":  "adminBox",
+                         "countdown":  1,
+                         "icon":  "🚫",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "keygold",
+                         "alias":  [
+                                       "keyvang"
+                                   ],
+                         "description":  "Nhường key vàng cho người được đề cập",
+                         "syntax":  "{p}keygold [@người_tag]",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔑",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "keysilver",
+                         "alias":  [
+                                       "keybac"
+                                   ],
+                         "description":  "Phong key bạc cho người được đề cập",
+                         "syntax":  "{p} [@người_tag]",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔑",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "unkey",
+                         "alias":  [
+                                       "xoakey"
+                                   ],
+                         "description":  "Xóa key của người được đề cập",
+                         "syntax":  "{p}unkey [@người_tag]",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔑",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "join",
+                         "alias":  [
+                                       "thamgianhom"
+                                   ],
+                         "description":  "Tham gia nhóm thông qua link",
+                         "syntax":  "{p}join [link]",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔑",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "leave",
+                         "alias":  [
+                                       "uotnhom"
+                                   ],
+                         "description":  "Ra lệnh bot rời khỏi nhóm hiện tại",
+                         "syntax":  "{p}leave",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔑",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "listgroups",
+                         "alias":  [
+                                       "lgr"
+                                   ],
+                         "description":  "Xem danh sách nhóm",
+                         "syntax":  "{p}listgroups",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔑",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "scangroups",
+                         "alias":  [
+                                       "scgr"
+                                   ],
+                         "description":  "Quét thành viên nhóm và thực hiện hành động theo yêu cầu",
+                         "syntax":  "{p}scangroups \u003chành_động\u003e \u003ccụm_từ_tìm_kiếm\u003e",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔑",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "deletemessage",
+                         "alias":  [
+                                       "delmsg"
+                                   ],
+                         "description":  "Xóa tin nhắn nhóm theo số lượng tin nhắn",
+                         "syntax":  "{p}deletemessage \u003csố_tin_nhắn\u003e (@mention cụ thể nếu có)",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🔑",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "listblockbot",
+                         "alias":  [
+                                       "lsbot"
+                                   ],
+                         "description":  "Xem danh sách người dùng đã bị chặn tương tác với bot",
+                         "syntax":  "{p}listblockbot",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "🚫",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "blockbot",
+                         "alias":  [
+                                       "blbot"
+                                   ],
+                         "description":  "Chặn người dùng tương tác với bot",
+                         "syntax":  "{p}blockbot \u003c@người_tag\u003e",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "🚫",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "unblockbot",
+                         "alias":  [
+                                       "unblbot"
+                                   ],
+                         "description":  "Bỏ chặn người dùng tương tác với bot",
+                         "syntax":  "{p}unblockbot \u003c@người_tag\u003e",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  1,
+                         "icon":  "✅",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     },
+                     {
+                         "name":  "whitelist",
+                         "description":  "Xem, thêm hoặc xóa người dùng được bot liệt vào danh sách trắng",
+                         "syntax":  "{p}whitelist",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "✅",
+                         "type":  3,
+                         "author":  "Thanh Bình",
+                         "active":  true,
+                         "alias":  [
+                                       "wl"
+                                   ]
+                     },
+                     {
+                         "name":  "alias",
+                         "description":  "Quản lý alias cho các lệnh",
+                         "syntax":  "{p}alias \u003cadd|remove\u003e \u003clệnh_gốc\u003e \u003clệnh_alias\u003e",
+                         "permission":  "adminLevelHigh",
+                         "countdown":  5,
+                         "icon":  "🏷️",
+                         "type":  1,
+                         "author":  "Thanh Bình",
+                         "active":  true
+                     }
+                 ]
+}
