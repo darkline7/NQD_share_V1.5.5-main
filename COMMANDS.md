@@ -17,6 +17,7 @@ Tài liệu này tổng hợp đầy đủ và chi tiết tất cả các lệnh
   - [5. Quản Trị Cơ Sở Dữ Liệu (MySQL)](#5-quản-trị-cơ-sở-dữ-liệu-mysql)
   - [6. Web Dashboard & API Endpoints](#6-web-dashboard--api-endpoints)
   - [7. Kiểm Tra Mạng & Quản Lý Cổng (Port / Process)](#7-kiểm-tra-mạng--quản-lý-cổng-port--process)
+  - [8. Cài Đặt & Triển Khai Trên VPS (Ubuntu / Debian / Linux)](#8-cài-đặt--triển-khai-trên-vps-ubuntu--debian--linux)
 - [PHẦN II: DANH SÁCH LỆNH CHAT BOT ZALO](#phần-ii-danh-sách-lệnh-chat-bot-zalo)
   - [1. Bảng Phân Quyền Trong Bot](#1-bảng-phân-quyền-trong-bot)
   - [2. Lệnh Dành Cho Mọi Thành Viên (`all` - Level 1)](#2-lệnh-dành-cho-mọi-thành-viên-all---level-1)
@@ -188,6 +189,119 @@ netstat -tulnp | grep 3300
 kill -9 <PID>
 ```
 
+
+---
+
+### 8. Cài Đặt & Triển Khai Trên VPS (Ubuntu / Debian / Linux)
+
+Hướng dẫn đầy đủ từng bước từ khi thuê VPS mới tinh đến khi bot chạy ngầm 24/7.
+
+#### Bước 1: Cập nhật VPS & Cài thư viện hệ thống cần thiết
+Bot sử dụng thư viện đồ họa `canvas`, `sharp`, `ffmpeg` nên cần cài các gói C/C++ native:
+```bash
+# Cập nhật danh sách gói
+sudo apt update && sudo apt upgrade -y
+
+# Cài đặt git, curl, build-essential và các thư viện đồ họa cho Canvas
+sudo apt install -y curl wget git build-essential python3 libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev ffmpeg
+```
+
+#### Bước 2: Cài đặt Node.js 20.x LTS & PM2
+```bash
+# Cài đặt NodeSource repository cho Node.js 20.x
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Kiểm tra phiên bản
+node -v   # Phải >= v20.x
+npm -v
+
+# Cài đặt PM2 để quản lý tiến trình chạy nền 24/7
+sudo npm install -g pm2
+```
+
+#### Bước 3: Tạo Swap RAM (Rất quan trọng cho VPS 1GB - 2GB RAM)
+VPS cấu hình 1GB - 2GB RAM rất dễ bị tràn RAM khi cài thư viện `canvas` hoặc khi xử lý ảnh/video:
+```bash
+# Tạo swap file 2GB
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Giữ swap tự kích hoạt sau khi reboot VPS
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Kiểm tra bộ nhớ
+free -h
+```
+
+#### Bước 4: Tải mã nguồn dự án về VPS
+```bash
+# Clone repo về VPS
+git clone https://github.com/darkline7/NQD_share_V1.5.5-main.git
+
+# Di chuyển vào thư mục dự án
+cd NQD_share_V1.5.5-main
+
+# Cài đặt dependencies
+npm install
+```
+
+#### Bước 5: Cấu hình tài khoản Zalo (Cookie & IMEI)
+```bash
+# Mở file cấu hình bằng nano
+nano assets/config.json
+```
+- Dán thông tin `cookie`, `imei`, `userAgent` của tài khoản bot vào.
+- Nhấn `Ctrl + O` rồi `Enter` để lưu.
+- Nhấn `Ctrl + X` để thoát nano.
+
+Nếu muốn phân quyền Super Admin cho tài khoản của bạn:
+```bash
+nano assets/data/list_admin.json
+# Thêm UID Zalo của bạn vào: ["ID_ZALO_CUA_BAN"]
+```
+
+#### Bước 6: Khởi chạy bot nền bằng PM2
+```bash
+# Khởi chạy bot qua wrapper bot.js
+pm2 start bot.js --name zlbot
+
+# Thiết lập tự chạy lại khi khởi động lại VPS
+pm2 startup
+pm2 save
+
+# Xem log hoạt động thời gian thực của bot
+pm2 logs zlbot
+```
+
+#### Bước 7: Mở tường lửa (UFW) cho Web Dashboard (Cổng 3300)
+Nếu muốn truy cập Web Dashboard từ xa qua `http://IP_VPS:3300`:
+```bash
+# Mở cổng 3300 TCP
+sudo ufw allow 3300/tcp
+
+# Kiểm tra trạng thái tường lửa
+sudo ufw status
+```
+
+#### Bước 8: Các lệnh bảo trì thường dùng trên VPS
+```bash
+# Xem trạng thái bot
+pm2 status
+
+# Khởi động lại bot (khi sửa config hoặc update code)
+pm2 restart zlbot
+
+# Dừng bot
+pm2 stop zlbot
+
+# Cập nhật code mới nhất từ GitHub
+git pull origin main
+npm install
+pm2 restart zlbot
+```
 
 ---
 
