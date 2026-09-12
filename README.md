@@ -69,6 +69,11 @@ API hien co:
 - `src/service-dqt/`: cac dich vu phu tro, AI, crawl, info va scheduler.
 - `src/utils/`: doc/ghi JSON, cache, queue, circuit breaker va cong cu tien ich.
 
+## Danh sach lenh chi tiet
+
+Xem toan bo danh sach lenh bot, lenh van hanh he thong va cẩm nang Git tai:
+👉 **[COMMANDS.md](./COMMANDS.md)**
+
 ## Ghi chu
 
 - Danh sach lenh va alias duoc quan ly theo code trong `src/commands/` va file cau hinh command.
