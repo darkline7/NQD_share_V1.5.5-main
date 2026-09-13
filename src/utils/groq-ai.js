@@ -2,7 +2,7 @@ import axios from "axios";
 import { readWebConfig, writeWebConfig } from "./io-json.js";
 
 const WEB_CONFIG_SECTION = "groqAI";
-const DEFAULT_MODEL = "llama-3.1-8b-instant";
+const DEFAULT_MODEL = "openai/gpt-oss-20b";
 
 function getConfigFromEnv() {
   return {
