@@ -340,6 +340,15 @@ pm2 restart zlbot
 | **sticker** | `stk` | `{p}sticker` | 10s | Chuyển đổi một hình ảnh thành dạng sticker Zalo (cần reply tin nhắn ảnh). |
 | **soundcloud** | `scl`, `ms`, `music` | `{p}soundcloud <từ khóa>`<br>`{p}soundcloud <từ khóa>&&<số lượng>` | 30s | Tìm kiếm và tải bài hát từ SoundCloud gửi vào nhóm theo yêu cầu. |
 | **voice** | Không | `{p}voice <nội dung>` | 5s | Chuyển đổi đoạn văn bản thành file âm thanh giọng nói tiếng Việt gửi vào nhóm. |
+| **game** | `minigame`, `trochoi` | `{p}game` | 3s | Xem danh sách và hướng dẫn đầy đủ các mini game & hệ thống ví kinh tế. |
+| **diemdanh** | `daily`, `dd` | `{p}diemdanh` hoặc `{p}daily` | 5s | Điểm danh nhận quà ngẫu nhiên từ 20.000 đến 60.000 VNĐ/ngày (15% nổ hũ x2). |
+| **vi** | `balance`, `cash`, `tien`, `wallet` | `{p}vi`<br>`{p}vi @tag` | 5s | Tạo ảnh Canvas thẻ tài khoản game hiển thị avatar, số dư, tổng thắng/thua, tỉ lệ win. |
+| **bank** | `chuyentien`, `pay` | `{p}bank @tag [số_tiền]` | 5s | Chuyển xu cho người chơi khác (hỗ trợ viết tắt `10k`, `500k`, `1m`, `50%`, `all`). |
+| **top** | `bxh`, `topgame` | `{p}top` | 5s | Xem bảng xếp hạng Top 10 người chơi sở hữu nhiều xu nhất server. |
+| **taixiu** | `tx` | `{p}tx [tai\|xiu] [số_tiền]` | 3s | Chơi mini-game Tài Xỉu, tự động vẽ ảnh kết quả 3 viên xúc xắc 3D Canvas chân thực. |
+| **baucua** | `bc` | `{p}bc [bau\|cua\|tom\|ca\|ga\|nai] [tiền]` | 3s | Chơi Bầu Cua Tôm Cá, vẽ đĩa linh vật 3D, nhân thưởng lên đến x3 nếu ra nhiều con. |
+| **keobuabao** | `kbb` | `{p}kbb [keo\|bua\|bao] [tiền]` | 3s | Thách đấu Kéo Búa Bao với Bot, hoàn tiền khi hòa, nhân đôi khi thắng. |
+
 
 ---
 
@@ -381,6 +390,8 @@ pm2 restart zlbot
 | **listadmin** | Không | `{p}listadmin` | 1s | Xem danh sách ban quản trị bot cấp cao và quản trị viên bot của nhóm hiện tại. |
 | **whitelist** | `wl` | `{p}whitelist [add\|remove\|list] @tag` | 1s | Quản lý danh sách thành viên tin cậy được miễn kiểm tra bởi Anti (link, spam, badword...). |
 | **listblockbot**| `lsbot` | `{p}listblockbot` | 1s | Xem danh sách những người dùng đang bị cấm sử dụng các lệnh của bot. |
+| **givemoney** | `setmoney` | `{p}givemoney @tag [số_tiền]` | 1s | Cấp tiền ảo/xu game cho người chơi được tag (Dành cho Admin Bot tổ chức sự kiện). |
+
 
 ---
 

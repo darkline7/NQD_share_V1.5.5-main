@@ -55,6 +55,18 @@ import { handleDeleteMessage } from "./bot-manager/recent-message.js";
 import { handleSpeedTestCommand } from "../service-dqt/utilities/speedtest.js";
 import { handleAiCommand } from "../service-dqt/utilities/ai-command.js";
 import { executeWithCircuitBreaker } from "../utils/circuit-breaker.js";
+import {
+  handleDailyCommand,
+  handleWalletCommand,
+  handleBankCommand,
+  handleTopCommand,
+  handleTaiXiuCommand,
+  handleBauCuaCommand,
+  handleKBBCommand,
+  handleGameMenuCommand,
+  handleAdminMoneyCommand,
+} from "../service-dqt/game-service/index.js";
+
 
 const lastCommandUsage = {};
 const HARD_DISABLED_COMMANDS = new Set([
@@ -327,6 +339,10 @@ export async function handleCommandPrivate(api, message) {
         case "setcmd":
           await handleSetCommandActive(api, message, commandParts);
           return 0;
+        case "givemoney":
+          await handleAdminMoneyCommand(api, message, isAdminBot);
+          return 0;
+
       }
     }
 
@@ -361,6 +377,28 @@ export async function handleCommandPrivate(api, message) {
           case "soundcloud":
             await executeExternalCrawlCommand(api, message, "soundcloud", () => handleMusicCommand(api, message, aliasCommand));
             return 0;
+          case "game":
+            await handleGameMenuCommand(api, message);
+            return 0;
+          case "diemdanh":
+            await handleDailyCommand(api, message);
+            return 0;
+          case "vi":
+            await handleWalletCommand(api, message, aliasCommand);
+            return 0;
+          case "top":
+            await handleTopCommand(api, message);
+            return 0;
+          case "taixiu":
+            await handleTaiXiuCommand(api, message, aliasCommand);
+            return 0;
+          case "baucua":
+            await handleBauCuaCommand(api, message, aliasCommand);
+            return 0;
+          case "keobuabao":
+            await handleKBBCommand(api, message, aliasCommand);
+            return 0;
+
         }
       } else {
         await sendMessageInsufficientAuthority(api, message, "Tương tác lệnh trong tin nhắn riêng tư đã bị tắt!");
@@ -600,6 +638,14 @@ export async function handleCommand(
         await handleDeleteMessage(api, message, groupAdmins, aliasCommand);
         break;
 
+      case "givemoney":
+        if (isAdminLevelHighest || isAdminBot) {
+          await handleAdminMoneyCommand(api, message, true);
+        } else {
+          await sendMessageInsufficientAuthority(api, message, "Chỉ Admin Bot mới có thể dùng lệnh này!");
+        }
+        break;
+
       default:
         if (numHandleCommand === 1) {
           await sendReactionConfirmReceive(api, message, numHandleCommand);
@@ -643,6 +689,38 @@ export async function handleCommand(
               case "soundcloud":
                 await executeExternalCrawlCommand(api, message, "soundcloud", () => handleMusicCommand(api, message, aliasCommand));
                 break;
+              case "game":
+                await handleGameMenuCommand(api, message);
+                break;
+
+              case "diemdanh":
+                await handleDailyCommand(api, message);
+                break;
+
+              case "vi":
+                await handleWalletCommand(api, message, aliasCommand);
+                break;
+
+              case "bank":
+                await handleBankCommand(api, message, aliasCommand);
+                break;
+
+              case "top":
+                await handleTopCommand(api, message);
+                break;
+
+              case "taixiu":
+                await handleTaiXiuCommand(api, message, aliasCommand);
+                break;
+
+              case "baucua":
+                await handleBauCuaCommand(api, message, aliasCommand);
+                break;
+
+              case "keobuabao":
+                await handleKBBCommand(api, message, aliasCommand);
+                break;
+
           }
         }
 

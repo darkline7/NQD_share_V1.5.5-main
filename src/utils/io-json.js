@@ -87,6 +87,11 @@ export async function ensureLogFiles() {
     if (!fs.existsSync(rankInfoPath)) {
       fs.writeFileSync(rankInfoPath, JSON.stringify({ groups: {} }, null, 2));
     }
+    const playersPath = path.resolve("./assets/json-data/players.json");
+    if (!fs.existsSync(playersPath)) {
+      fs.writeFileSync(playersPath, JSON.stringify({ players: {} }, null, 2));
+    }
+
   } catch (err) {
     console.error("Lỗi khi tạo thư mục hoặc file log:", err);
   }

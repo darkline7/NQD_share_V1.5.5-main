@@ -131,6 +131,140 @@
                          "author":  "Thanh Bình",
                          "active":  true
                      },
+                      {
+                          "name":  "game",
+                          "alias":  [
+                                        "minigame",
+                                        "trochoi"
+                                    ],
+                          "description":  "Xem hướng dẫn các trò chơi và lệnh kinh tế",
+                          "syntax":  "{p}game",
+                          "permission":  "all",
+                          "countdown":  3,
+                          "icon":  "🎮",
+                          "type":  1,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+                      {
+                          "name":  "diemdanh",
+                          "alias":  [
+                                        "daily",
+                                        "dd"
+                                    ],
+                          "description":  "Điểm danh hàng ngày nhận 20k - 60k xu may mắn",
+                          "syntax":  "{p}diemdanh",
+                          "permission":  "all",
+                          "countdown":  5,
+                          "icon":  "🎁",
+                          "type":  1,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+                      {
+                          "name":  "vi",
+                          "alias":  [
+                                        "balance",
+                                        "cash",
+                                        "tien",
+                                        "wallet"
+                                    ],
+                          "description":  "Xem thẻ tài khoản game, avatar và số dư của bạn hoặc người được tag",
+                          "syntax":  "{p}vi || {p}vi [@tag]",
+                          "permission":  "all",
+                          "countdown":  5,
+                          "icon":  "💳",
+                          "type":  1,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+                      {
+                          "name":  "bank",
+                          "alias":  [
+                                        "chuyentien",
+                                        "pay"
+                                    ],
+                          "description":  "Chuyển tiền cho thành viên khác trong nhóm",
+                          "syntax":  "{p}bank [@người_nhận] [số_tiền]",
+                          "permission":  "all",
+                          "countdown":  5,
+                          "icon":  "💸",
+                          "type":  1,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+                      {
+                          "name":  "top",
+                          "alias":  [
+                                        "bxh",
+                                        "topgame"
+                                    ],
+                          "description":  "Xem bảng xếp hạng Top 10 đại gia game sở hữu nhiều xu nhất",
+                          "syntax":  "{p}top",
+                          "permission":  "all",
+                          "countdown":  5,
+                          "icon":  "🏆",
+                          "type":  1,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+                      {
+                          "name":  "taixiu",
+                          "alias":  [
+                                        "tx"
+                                    ],
+                          "description":  "Chơi Tài Xỉu may mắn với xúc xắc 3D",
+                          "syntax":  "{p}tx [tai/xiu] [số_tiền]",
+                          "permission":  "all",
+                          "countdown":  3,
+                          "icon":  "🎲",
+                          "type":  1,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+                      {
+                          "name":  "baucua",
+                          "alias":  [
+                                        "bc"
+                                    ],
+                          "description":  "Chơi Bầu Cua Tôm Cá (bau, cua, tom, ca, ga, nai)",
+                          "syntax":  "{p}bc [linh_vật] [số_tiền]",
+                          "permission":  "all",
+                          "countdown":  3,
+                          "icon":  "🎋",
+                          "type":  1,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+                      {
+                          "name":  "keobuabao",
+                          "alias":  [
+                                        "kbb"
+                                    ],
+                          "description":  "Chơi Kéo Búa Bao với Bot",
+                          "syntax":  "{p}kbb [keo/bua/bao] [số_tiền]",
+                          "permission":  "all",
+                          "countdown":  3,
+                          "icon":  "⚔️",
+                          "type":  1,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+                      {
+                          "name":  "givemoney",
+                          "alias":  [
+                                        "setmoney"
+                                    ],
+                          "description":  "Cấp tiền game cho người chơi (Admin Bot)",
+                          "syntax":  "{p}givemoney [@tag] [số_tiền]",
+                          "permission":  "adminBot",
+                          "countdown":  1,
+                          "icon":  "👑",
+                          "type":  2,
+                          "author":  "DQT",
+                          "active":  true
+                      },
+
                      {
                          "name":  "manager",
                          "description":  "Xem toàn bộ danh sách lệnh admin",

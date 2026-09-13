@@ -25,6 +25,8 @@ assets/json-data/rank-info.json
 assets/json-data/manager-bot.json
 assets/json-data/prophylactic.json
 assets/web-config/web-config.json
+assets/json-data/players.json
+
 
 # Database Dumps
 *.sql
