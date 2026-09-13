@@ -145,7 +145,8 @@ export async function messagesUser(api, message) {
         // numberHandleCommand = 99: Phát Hiện Dùng Lệnh Không Tồn Tại
         handleChat = handleChat && !isSelf;
         if (handleChat || (!isSelf && isAdminBot)) {
-          await handleOnChatUser(api, message, false, groupSettings);
+          const isGameChat = await handleOnChatUser(api, message, false, groupSettings);
+          if (isGameChat) return;
         }
         if (handleChat || isAdminBot) {
           handleChat = await handleOnReplyFromUser(

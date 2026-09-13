@@ -154,6 +154,38 @@ export function recordGameResult(userId, isWin, betAmount, winProfit) {
   savePlayersData();
   return player;
 }
+export function recordMultiplayerGameResult(userId, isWin, betAmount, winProfit) {
+  const player = getOrCreatePlayer(userId);
+  const betBig = new Big(betAmount);
+  const winProfitBig = new Big(winProfit);
+
+  player.totalGames = (player.totalGames || 0) + 1;
+
+  if (isWin) {
+    player.totalWinGames = (player.totalWinGames || 0) + 1;
+    player.totalWinnings = new Big(player.totalWinnings || 0).plus(winProfitBig).toString();
+    // Vốn đã bị trừ lúc cược, giờ hoàn lại vốn + trả tiền lãi
+    const totalPayout = betBig.plus(winProfitBig);
+    player.balance = new Big(player.balance || 0).plus(totalPayout).round(0, Big.roundDown).toString();
+  } else {
+    player.totalLosses = new Big(player.totalLosses || 0).plus(betBig).toString();
+    // Tiền cược đã bị trừ trước đó, không cần trừ lại
+  }
+
+  player.netProfit = new Big(player.totalWinnings || 0).minus(new Big(player.totalLosses || 0)).toString();
+  player.winRate = ((player.totalWinGames / player.totalGames) * 100).toFixed(2);
+
+  savePlayersData();
+  return player;
+}
+
+export function refundPlayerBalance(userId, refundAmount) {
+  const player = getOrCreatePlayer(userId);
+  player.balance = new Big(player.balance || 0).plus(new Big(refundAmount)).round(0, Big.roundDown).toString();
+  savePlayersData();
+  return player.balance;
+}
+
 
 export function checkDailyStatus(userId) {
   const player = getOrCreatePlayer(userId);

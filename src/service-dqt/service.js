@@ -11,6 +11,8 @@ import { notifyResetGroup } from "../commands/bot-manager/active-bot.js";
 import { handleScanGroupsReply } from "../commands/bot-manager/scan-group.js";
 import { startAntiConfigCheck } from "./anti-service/index.js";
 import { initializeCacheService } from "../utils/link-platform-cache.js";
+import { handleQuickBetChat } from "./game-service/index.js";
+
 
 let globalPrefix = "@";
 
@@ -44,7 +46,7 @@ export async function handleOnChatUser(
   isCallGame,
   groupSettings
 ) {
-  return false;
+  return await handleQuickBetChat(api, message);
 }
 
 export async function handleOnReplyFromUser(

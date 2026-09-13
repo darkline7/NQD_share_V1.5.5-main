@@ -211,10 +211,12 @@
                       {
                           "name":  "taixiu",
                           "alias":  [
-                                        "tx"
+                                        "tx",
+                                        "txb",
+                                        "taixiuban"
                                     ],
-                          "description":  "Chơi Tài Xỉu may mắn với xúc xắc 3D",
-                          "syntax":  "{p}tx [tai/xiu] [số_tiền]",
+                          "description":  "Chơi Tài Xỉu solo hoặc mở bàn cược 60s cả nhóm cùng chơi",
+                          "syntax":  "{p}tx [tai/xiu] [tiền] | {p}tx open | {p}txb",
                           "permission":  "all",
                           "countdown":  3,
                           "icon":  "🎲",
@@ -225,10 +227,12 @@
                       {
                           "name":  "baucua",
                           "alias":  [
-                                        "bc"
+                                        "bc",
+                                        "bcb",
+                                        "baucuaban"
                                     ],
-                          "description":  "Chơi Bầu Cua Tôm Cá (bau, cua, tom, ca, ga, nai)",
-                          "syntax":  "{p}bc [linh_vật] [số_tiền]",
+                          "description":  "Chơi Bầu Cua Tôm Cá solo hoặc mở bàn cược 60s nhóm",
+                          "syntax":  "{p}bc [linh_vật] [tiền] | {p}bc open | {p}bcb",
                           "permission":  "all",
                           "countdown":  3,
                           "icon":  "🎋",

@@ -345,8 +345,8 @@ pm2 restart zlbot
 | **vi** | `balance`, `cash`, `tien`, `wallet` | `{p}vi`<br>`{p}vi @tag` | 5s | Tạo ảnh Canvas thẻ tài khoản game hiển thị avatar, số dư, tổng thắng/thua, tỉ lệ win. |
 | **bank** | `chuyentien`, `pay` | `{p}bank @tag [số_tiền]` | 5s | Chuyển xu cho người chơi khác (hỗ trợ viết tắt `10k`, `500k`, `1m`, `50%`, `all`). |
 | **top** | `bxh`, `topgame` | `{p}top` | 5s | Xem bảng xếp hạng Top 10 người chơi sở hữu nhiều xu nhất server. |
-| **taixiu** | `tx` | `{p}tx [tai\|xiu] [số_tiền]` | 3s | Chơi mini-game Tài Xỉu, tự động vẽ ảnh kết quả 3 viên xúc xắc 3D Canvas chân thực. |
-| **baucua** | `bc` | `{p}bc [bau\|cua\|tom\|ca\|ga\|nai] [tiền]` | 3s | Chơi Bầu Cua Tôm Cá, vẽ đĩa linh vật 3D, nhân thưởng lên đến x3 nếu ra nhiều con. |
+| **taixiu** | `tx`, `txb`, `taixiuban` | `{p}tx [tai\|xiu] [tiền]`<br>`{p}tx open` / `{p}txb`<br>`{p}tx status`<br>`{p}tx cancel` | 3s | **Tài Xỉu Solo & Bàn Cược Nhóm 60s (Multiplayer)**:<br>• Solo: `{p}tx [tai\|xiu] [tiền]` ăn thua ngay.<br>• Bàn nhóm: `{p}tx open` hoặc `{p}txb` mở phiên 60s cho cả nhóm cùng cược. Trong 60s, mọi người có thể gõ nhanh `tai 50k`, `xiu 100k` (không cần prefix). Vẽ ảnh Canvas bảng kết quả vinh danh người thắng / người thua! |
+| **baucua** | `bc`, `bcb`, `baucuaban` | `{p}bc [linh_vật] [tiền]`<br>`{p}bc open` / `{p}bcb`<br>`{p}bc status`<br>`{p}bc cancel` | 3s | **Bầu Cua Solo & Bàn Cược Nhóm 60s (Multiplayer)**:<br>• Solo: `{p}bc [linh_vật] [tiền]` nhân thưởng lên đến x3.<br>• Bàn nhóm: `{p}bc open` hoặc `{p}bcb` mở bàn 60s. Mọi người có thể cược nhiều con cùng lúc (`cua 50k`, `tom 100k`, `ca all`...). Vẽ ảnh Canvas đĩa 3D kèm danh sách thắng thua toàn sàn! |
 | **keobuabao** | `kbb` | `{p}kbb [keo\|bua\|bao] [tiền]` | 3s | Thách đấu Kéo Búa Bao với Bot, hoàn tiền khi hòa, nhân đôi khi thắng. |
 
 

@@ -1,10 +1,18 @@
 import { getOrCreatePlayer, recordGameResult, getGamePrefix } from "./player-data.js";
 import { createBauCuaImage } from "./game-canvas.js";
+import {
+  openGameSession,
+  placeSessionBet,
+  isSessionActive,
+  getActiveSession,
+  getSessionStatusText,
+  cancelGameSession
+} from "./game-session.js";
 import { clearImagePath } from "../../utils/canvas/index.js";
 import { formatCurrency, parseGameAmount, removeMention } from "../../utils/format-util.js";
 import Big from "big.js";
 
-const ANIMALS = [
+export const ANIMALS = [
   { id: "bau", name: "Bầu", icon: "🍐", aliases: ["bau", "bầu"] },
   { id: "cua", name: "Cua", icon: "🦀", aliases: ["cua"] },
   { id: "tom", name: "Tôm", icon: "🦐", aliases: ["tom", "tôm"] },
@@ -24,21 +32,84 @@ export async function handleBauCuaCommand(api, message, aliasCommand) {
   let rawContent = removeMention(message).trim();
   rawContent = rawContent.replace(new RegExp(`^${prefix}${aliasCommand}`, "i"), "").trim();
   const parts = rawContent.split(/\s+/).filter(Boolean);
+  const subCmd = parts[0]?.toLowerCase();
+
+  // Xem trạng thái bàn
+  if (subCmd === "status" || subCmd === "st" || subCmd === "tt") {
+    const statusText = getSessionStatusText(threadId);
+    if (!statusText) {
+      await api.sendMessage(
+        { msg: `ℹ️ Hiện tại không có bàn cược Bầu Cua nào đang mở trong nhóm.\n💡 Dùng \`${prefix}bc open\` hoặc \`${prefix}bcb\` để mở bàn mới 60s!`, quote: message },
+        threadId,
+        message.type
+      );
+    } else {
+      await api.sendMessage({ msg: statusText, quote: message }, threadId, message.type);
+    }
+    return;
+  }
+
+  // Hủy bàn
+  if (subCmd === "cancel" || subCmd === "huy") {
+    const canceled = await cancelGameSession(api, threadId, `Hủy bởi ${senderName}`, message);
+    if (!canceled) {
+      await api.sendMessage({ msg: "ℹ️ Hiện không có bàn cược nào đang mở để hủy.", quote: message }, threadId, message.type);
+    }
+    return;
+  }
+
+  // Mở bàn: /bc open hoặc /bcb
+  const isBcbAlias = aliasCommand === "bcb" || aliasCommand === "baucuaban";
+  if (subCmd === "open" || subCmd === "ban" || subCmd === "phien" || (isBcbAlias && !isSessionActive(threadId))) {
+    let initialBet = null;
+    const betArgStart = subCmd === "open" || subCmd === "ban" || subCmd === "phien" ? 1 : 0;
+    if (parts[betArgStart] && parts[betArgStart + 1]) {
+      initialBet = { choice: parts[betArgStart], amountStr: parts[betArgStart + 1] };
+    }
+    await openGameSession(api, threadId, "baucua", { uid: senderId, name: senderName }, initialBet, message);
+    return;
+  }
+
+  // Nếu trong nhóm đang có bàn cược mở, chuyển cược vào bàn cộng đồng
+  if (isSessionActive(threadId)) {
+    const session = getActiveSession(threadId);
+    if (session && session.gameType === "baucua") {
+      if (parts.length >= 2) {
+        await placeSessionBet(api, message, "baucua", parts[0], parts[1]);
+        return;
+      } else {
+        const statusText = getSessionStatusText(threadId);
+        await api.sendMessage(
+          {
+            msg: `⚠️ Bàn cược Bầu Cua đang mở!\n${statusText}\n👉 Đặt cược: \`${prefix}bc [linh_vật] [tiền]\` hoặc gõ nhanh \`cua 50k\`, \`bau 100k\``,
+            quote: message
+          },
+          threadId,
+          message.type
+        );
+        return;
+      }
+    }
+  }
 
   if (parts.length < 2) {
     const guideMsg =
       `🎋 HƯỚNG DẪN CHƠI BẦU CUA TÔM CÁ 🎋\n═════════════════════\n` +
-      `📌 Cú pháp: ${prefix}${aliasCommand} [linh_vật] [số_tiền]\n` +
-      `🐾 Danh sách linh vật cược:\n` +
-      `  • 🍐 bau (Bầu)   • 🦀 cua (Cua)\n` +
-      `  • 🦐 tom (Tôm)   • 🐟 ca (Cá)\n` +
-      `  • 🐓 ga (Gà)     • 🦌 nai (Nai)\n` +
-      `💡 Ví dụ: ${prefix}bc bau 50k | ${prefix}bc ca 100k | ${prefix}bc tom all\n` +
-      `📜 Tỉ lệ trả thưởng: Trúng 1 con: x1, 2 con: x2, 3 con: x3!\n` +
+      `📌 Chế độ Solo (ăn thua ngay lập tức):\n` +
+      `  • ${prefix}bc [linh_vật] [số_tiền]\n` +
+      `  • Ví dụ: ${prefix}bc bau 50k | ${prefix}bc ca 100k | ${prefix}bc tom all\n\n` +
+      `🔥 Chế độ Bàn Cược Nhóm (60s cả nhóm cùng cược):\n` +
+      `  • ${prefix}bc open (hoặc ${prefix}bcb): Mở bàn cược 60 giây\n` +
+      `  • Khi bàn mở, gõ nhanh: cua 50k, bau 100k, tom all\n` +
+      `  • ${prefix}bc status: Xem trạng thái cược bàn\n` +
+      `  • ${prefix}bc cancel: Hủy bàn hoàn tiền 100%\n\n` +
+      `🐾 Linh vật: 🍐 bau (Bầu) | 🦀 cua (Cua) | 🦐 tom (Tôm) | 🐟 ca (Cá) | 🐓 ga (Gà) | 🦌 nai (Nai)\n` +
+      `📜 Trả thưởng: Trúng 1 con: x1, 2 con: x2, 3 con: x3!\n` +
       `💰 Số dư hiện tại của bạn: ${formatCurrency(player.balance)} VNĐ`;
     await api.sendMessage({ msg: guideMsg, quote: message }, threadId, message.type);
     return;
   }
+
 
   const inputAnimal = parts[0].toLowerCase();
   const matchedAnimal = ANIMALS.find((a) => a.aliases.includes(inputAnimal) || a.id === inputAnimal);
