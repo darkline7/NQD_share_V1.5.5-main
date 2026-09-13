@@ -23,14 +23,20 @@ npm install
 
 ## Cau hinh
 
-Chinh cac file sau theo moi truong cua ban:
+Copy cac file mau sau va dien thong tin:
 
-- `assets/config.json`: cookie, imei, userAgent.
-- `assets/data/list_admin.json`: danh sach admin bot cap cao.
-- `assets/data/group_settings.json`: cau hinh rieng theo tung nhom.
+```bash
+# Tao file cau hinh tai khoan Zalo
+cp assets/config.example.json assets/config.json
+
+# (Tuy chon) Tao file danh sach admin bot cap cao
+cp assets/data/list_admin.example.json assets/data/list_admin.json
+```
+
+- `assets/config.json`: cookie, imei, userAgent (khong duoc commit file nay len Git).
+- `assets/data/list_admin.json`: danh sach admin bot cap cao (khong duoc commit file nay len Git).
 - `assets/json-data/command.json`: cau hinh bat/tat va tham so lenh.
-- `assets/web-config/web-config.json`: cau hinh runtime cho dashboard.
-- `assets/json-data/prophylactic.json`: trang thai bao ve upload attachment.
+
 
 ## Chay bot
 

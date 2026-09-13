@@ -24,13 +24,17 @@
 
 import { spawn } from 'child_process';
 import path from 'path';
-const cmdPath = path.join('C:', 'Windows', 'System32', 'cmd.exe');
+
+const isWin = process.platform === 'win32';
+const cmdPath = isWin ? path.join('C:', 'Windows', 'System32', 'cmd.exe') : 'npm';
+const cmdArgs = isWin ? ['/c', 'npm start'] : ['start'];
+
 import { ensureLogFiles, logManagerBot } from './src/utils/io-json.js';
 
 let botProcess;
 
 function startBot() {
-    botProcess = spawn(cmdPath, ['/c', 'npm start'], {
+    botProcess = spawn(cmdPath, cmdArgs, {
         detached: true,
         stdio: 'ignore'
     });

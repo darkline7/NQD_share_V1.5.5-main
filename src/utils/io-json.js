@@ -49,6 +49,10 @@ export async function ensureLogFiles() {
     await mkdir(resourceDir, { recursive: true });
     await mkdir(tempDir, { recursive: true });
     await mkdir(dataGifPath, { recursive: true });
+    await mkdir(path.resolve("./assets/data"), { recursive: true });
+    await mkdir(path.resolve("./assets/json-data"), { recursive: true });
+    await mkdir(path.resolve("./assets/web-config"), { recursive: true });
+
     if (!fs.existsSync(logManagerBotFilePath)) {
       fs.writeFileSync(logManagerBotFilePath, "");
     }
@@ -57,6 +61,31 @@ export async function ensureLogFiles() {
     }
     if (!fs.existsSync(loggingMessageJsonPath)) {
       fs.writeFileSync(loggingMessageJsonPath, "{}");
+    }
+    if (!fs.existsSync(configFilePath)) {
+      fs.writeFileSync(configFilePath, JSON.stringify({
+        cookie: { url: "https://chat.zalo.me", cookies: [] },
+        imei: "",
+        userAgent: ""
+      }, null, 2));
+    }
+    if (!fs.existsSync(adminFilePath)) {
+      fs.writeFileSync(adminFilePath, "[]");
+    }
+    if (!fs.existsSync(groupSettingsPath)) {
+      fs.writeFileSync(groupSettingsPath, "{}");
+    }
+    const aiMemPath = path.resolve("./assets/json-data/ai-memory.json");
+    if (!fs.existsSync(aiMemPath)) {
+      fs.writeFileSync(aiMemPath, "{}");
+    }
+    const cacheLinkPath = path.resolve("./assets/json-data/cache-link.json");
+    if (!fs.existsSync(cacheLinkPath)) {
+      fs.writeFileSync(cacheLinkPath, JSON.stringify({ youtube: {}, zingmp3: {}, soundcloud: {}, nhaccuatui: {} }, null, 2));
+    }
+    const rankInfoPath = path.resolve("./assets/json-data/rank-info.json");
+    if (!fs.existsSync(rankInfoPath)) {
+      fs.writeFileSync(rankInfoPath, JSON.stringify({ groups: {} }, null, 2));
     }
   } catch (err) {
     console.error("Lỗi khi tạo thư mục hoặc file log:", err);

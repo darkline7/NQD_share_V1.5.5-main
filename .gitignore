@@ -1,8 +1,36 @@
+# Dependencies
 node_modules/
+
+# Logs
 logs/
-temp/
-.cleanup_backup_*/
-.agents/
 *.log
 *.err.log
 *.out.log
+
+# Temporary and Cache directories
+temp/
+assets/temp/
+.cleanup_backup_*/
+.agents/
+
+# Sensitive Configuration & Personal Credentials
+assets/config.json
+assets/data/list_admin.json
+assets/data/group_settings.json
+
+# Runtime & Personal Chat Data
+assets/json-data/ai-memory.json
+assets/json-data/cache-link.json
+assets/json-data/rank-info.json
+assets/json-data/manager-bot.json
+assets/json-data/prophylactic.json
+assets/web-config/web-config.json
+
+# Database Dumps
+*.sql
+
+# System & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

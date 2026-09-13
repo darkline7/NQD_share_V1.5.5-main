@@ -250,6 +250,9 @@ npm install
 
 #### Bước 5: Cấu hình tài khoản Zalo (Cookie & IMEI)
 ```bash
+# Tạo file cấu hình từ file mẫu
+cp assets/config.example.json assets/config.json
+
 # Mở file cấu hình bằng nano
 nano assets/config.json
 ```
@@ -259,6 +262,7 @@ nano assets/config.json
 
 Nếu muốn phân quyền Super Admin cho tài khoản của bạn:
 ```bash
+cp assets/data/list_admin.example.json assets/data/list_admin.json
 nano assets/data/list_admin.json
 # Thêm UID Zalo của bạn vào: ["ID_ZALO_CUA_BAN"]
 ```
