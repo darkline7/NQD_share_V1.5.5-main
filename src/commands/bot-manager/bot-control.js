@@ -6,7 +6,7 @@ import {
 import { getGlobalPrefix } from "../../service-dqt/service.js";
 import { writeGroupSettings, readAdmins } from "../../utils/io-json.js";
 import { getGroupAdmins } from "../../service-dqt/info-service/group-info.js";
-import { isHighestAdmin } from "../manager-command/set-command.js";
+import { isAdmin } from "../../index.js";
 
 export function isBotControlCommand(content, prefix) {
   if (!content || typeof content !== "string") return false;
@@ -70,7 +70,7 @@ export async function handleBotControlCommand(
     const isAdminBox = Array.isArray(groupAdmins) && groupAdmins.includes(senderId);
     const botAdmins = readAdmins();
     const isAdminBot = Array.isArray(botAdmins) && botAdmins.includes(senderId);
-    const isAdminLevelHighest = isHighestAdmin(senderId);
+    const isAdminLevelHighest = isAdmin(senderId);
     isAuthorized = isAdminBox || isAdminBot || isAdminLevelHighest;
   }
 
