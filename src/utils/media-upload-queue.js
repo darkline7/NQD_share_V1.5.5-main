@@ -1,7 +1,7 @@
 const DEFAULT_MEDIA_QUEUE_SETTINGS = {
   enabled: true,
   maxConcurrentPerGroup: 1,
-  maxPendingPerGroup: 25,
+  maxPendingPerGroup: 50,
   acquireTimeoutMs: 120000,
 };
 

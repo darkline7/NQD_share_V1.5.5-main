@@ -175,6 +175,15 @@ export async function handleBauCuaCommand(api, message, aliasCommand) {
     winProfit.toString()
   );
 
+  const rolledIcons = rolled.map((r) => `${r.icon} ${r.name}`).join(' - ');
+  const summaryText =
+    `🎋 KẾT QUẢ BẦU CUA TÔM CÁ 🎋\n` +
+    `👤 Người chơi: ${senderName}\n` +
+    `🎯 Cửa đặt: ${matchedAnimal.icon} ${matchedAnimal.name} - ${formatCurrency(betAmount.toString())} VNĐ\n` +
+    `🎲 Lắc ra: ${rolledIcons}\n` +
+    `${isWin ? `🎉 TRÚNG ${matches} CON (+${formatCurrency(winProfit.toString())} VNĐ)` : `💀 KHÔNG TRÚNG CON NÀO (-${formatCurrency(betAmount.toString())} VNĐ)`}\n` +
+    `💰 Số dư hiện tại: ${formatCurrency(updatedPlayer.balance)} VNĐ`;
+
   let imagePath = null;
   try {
     imagePath = await createBauCuaImage({
@@ -187,35 +196,26 @@ export async function handleBauCuaCommand(api, message, aliasCommand) {
       balance: updatedPlayer.balance,
       playerName: senderName
     });
+  } catch (canvasErr) {
+    console.error('Lỗi khi tạo ảnh Bầu Cua:', canvasErr);
+  }
 
-    const rolledIcons = rolled.map((r) => `${r.icon} ${r.name}`).join(" - ");
-    const summaryText =
-      `🎋 KẾT QUẢ BẦU CUA TÔM CÁ 🎋\n` +
-      `👤 Người chơi: ${senderName}\n` +
-      `🎯 Cửa đặt: ${matchedAnimal.icon} ${matchedAnimal.name} - ${formatCurrency(betAmount.toString())} VNĐ\n` +
-      `🎲 Lắc ra: ${rolledIcons}\n` +
-      `${isWin ? `🎉 TRÚNG ${matches} CON (+${formatCurrency(winProfit.toString())} VNĐ)` : `💀 KHÔNG TRÚNG CON NÀO (-${formatCurrency(betAmount.toString())} VNĐ)`}\n` +
-      `💰 Số dư hiện tại: ${formatCurrency(updatedPlayer.balance)} VNĐ`;
-
-    await api.sendMessage(
-      { msg: summaryText, attachments: [imagePath], quote: message },
-      threadId,
-      message.type
-    );
-  } catch (error) {
-    console.error("Lỗi khi tạo ảnh Bầu Cua:", error);
-    const rolledIcons = rolled.map((r) => `${r.icon} ${r.name}`).join(" - ");
-    const textOnly =
-      `🎋 KẾT QUẢ BẦU CUA 🎋\n` +
-      `👤 Người chơi: ${senderName}\n` +
-      `🎯 Cửa đặt: ${matchedAnimal.name} (${formatCurrency(betAmount.toString())} VNĐ)\n` +
-      `🎲 Lắc ra: ${rolledIcons}\n` +
-      `${isWin ? `🎉 TRÚNG ${matches} CON (+${formatCurrency(winProfit.toString())} VNĐ)` : `💀 THUA (-${formatCurrency(betAmount.toString())} VNĐ)`}\n` +
-      `💰 Số dư mới: ${formatCurrency(updatedPlayer.balance)} VNĐ`;
-    await api.sendMessage({ msg: textOnly, quote: message }, threadId, message.type);
-  } finally {
+  try {
     if (imagePath) {
-      await clearImagePath(imagePath);
+      await api.sendMessage(
+        { msg: summaryText, attachments: [imagePath], quote: message },
+        threadId,
+        message.type
+      );
+    } else {
+      await api.sendMessage({ msg: summaryText, quote: message }, threadId, message.type);
     }
+  } catch (sendErr) {
+    console.error('Lỗi khi gửi kết quả Bầu Cua, fallback text:', sendErr.message);
+    try {
+      await api.sendMessage({ msg: summaryText, quote: message }, threadId, message.type);
+    } catch (_) {}
+  } finally {
+    if (imagePath) clearImagePath(imagePath).catch(() => {});
   }
 }

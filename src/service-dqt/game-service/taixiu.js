@@ -180,46 +180,44 @@ export async function handleTaiXiuCommand(api, message, aliasCommand) {
     winProfit.toString()
   );
 
+  const summaryText =
+    `🎲 KẾT QUẢ TÀI XỈU 🎲\n` +
+    `👤 Người chơi: ${senderName}\n` +
+    `🎯 Cửa đặt: ${choice} - ${formatCurrency(betAmount.toString())} VNĐ\n` +
+    `🎲 Xúc xắc: [ ${d1} ] - [ ${d2} ] - [ ${d3} ] ➔ ${total} điểm (${resultType})\n` +
+    `${isWin ? `🎉 THẮNG LỚN: +${formatCurrency(winProfit.toString())} VNĐ` : `💀 THUA CƯỢC: -${formatCurrency(betAmount.toString())} VNĐ`}\n` +
+    `💰 Số dư hiện tại: ${formatCurrency(updatedPlayer.balance)} VNĐ`;
+
   let imagePath = null;
   try {
     imagePath = await createTaiXiuImage({
-      dice,
-      total,
-      resultType,
-      isWin,
+      dice, total, resultType, isWin,
       betAmount: betAmount.toString(),
       winProfit: winProfit.toString(),
       balance: updatedPlayer.balance,
       playerName: senderName,
       choice
     });
+  } catch (canvasErr) {
+    console.error('Lỗi khi tạo ảnh Tài Xỉu:', canvasErr);
+  }
 
-    const summaryText =
-      `🎲 KẾT QUẢ TÀI XỈU 🎲\n` +
-      `👤 Người chơi: ${senderName}\n` +
-      `🎯 Cửa đặt: ${choice} - ${formatCurrency(betAmount.toString())} VNĐ\n` +
-      `🎲 Xúc xắc: [ ${d1} ] - [ ${d2} ] - [ ${d3} ] ➔ ${total} điểm (${resultType})\n` +
-      `${isWin ? `🎉 THẮNG LỚN: +${formatCurrency(winProfit.toString())} VNĐ` : `💀 THUA CƯỢC: -${formatCurrency(betAmount.toString())} VNĐ`}\n` +
-      `💰 Số dư hiện tại: ${formatCurrency(updatedPlayer.balance)} VNĐ`;
-
-    await api.sendMessage(
-      { msg: summaryText, attachments: [imagePath], quote: message },
-      threadId,
-      message.type
-    );
-  } catch (error) {
-    console.error("Lỗi khi tạo ảnh Tài Xỉu:", error);
-    const textOnly =
-      `🎲 KẾT QUẢ TÀI XỈU 🎲\n` +
-      `👤 Người chơi: ${senderName}\n` +
-      `🎯 Cửa đặt: ${choice} (${formatCurrency(betAmount.toString())} VNĐ)\n` +
-      `🎲 Xúc xắc: [ ${d1} ] [ ${d2} ] [ ${d3} ] ➔ Tổng ${total} (${resultType})\n` +
-      `${isWin ? `🎉 THẮNG: +${formatCurrency(winProfit.toString())} VNĐ` : `💀 THUA: -${formatCurrency(betAmount.toString())} VNĐ`}\n` +
-      `💰 Số dư mới: ${formatCurrency(updatedPlayer.balance)} VNĐ`;
-    await api.sendMessage({ msg: textOnly, quote: message }, threadId, message.type);
-  } finally {
+  try {
     if (imagePath) {
-      await clearImagePath(imagePath);
+      await api.sendMessage(
+        { msg: summaryText, attachments: [imagePath], quote: message },
+        threadId,
+        message.type
+      );
+    } else {
+      await api.sendMessage({ msg: summaryText, quote: message }, threadId, message.type);
     }
+  } catch (sendErr) {
+    console.error('Lỗi khi gửi kết quả Tài Xỉu, fallback text:', sendErr.message);
+    try {
+      await api.sendMessage({ msg: summaryText, quote: message }, threadId, message.type);
+    } catch (_) {}
+  } finally {
+    if (imagePath) clearImagePath(imagePath).catch(() => {});
   }
 }

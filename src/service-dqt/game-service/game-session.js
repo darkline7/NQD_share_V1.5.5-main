@@ -317,6 +317,32 @@ async function resolveTaiXiuSession(api, threadId, session, messageObj) {
     }
   });
 
+  let txSummaryText =
+    `🎲═════════════════════════🎲\n` +
+    `   🔥 KẾT QUẢ TÀI XỈU CỘNG ĐỒNG 🔥\n` +
+    `🎲═════════════════════════🎲\n` +
+    `🎲 Xúc xắc: [ ${d1} ] - [ ${d2} ] - [ ${d3} ] ➔ ${total} điểm (${resultType})\n\n`;
+
+  if (winners.length > 0) {
+    txSummaryText += `🏆 THẮNG CƯỢC (${winners.length} người):\n`;
+    winners.slice(0, 5).forEach((w) => {
+      txSummaryText += `  • ${w.name}: +${formatCurrency(w.profit)} VNĐ [${w.choice}]\n`;
+    });
+    if (winners.length > 5) txSummaryText += `  • ... và ${winners.length - 5} người khác\n`;
+  } else {
+    txSummaryText += `💀 Không có người chơi nào thắng phiên này!\n`;
+  }
+
+  if (losers.length > 0) {
+    txSummaryText += `\n💀 THUA CƯỢC (${losers.length} người):\n`;
+    losers.slice(0, 5).forEach((l) => {
+      txSummaryText += `  • ${l.name}: -${formatCurrency(l.amount)} VNĐ [${l.choice}]\n`;
+    });
+    if (losers.length > 5) txSummaryText += `  • ... và ${losers.length - 5} người khác\n`;
+  }
+
+  txSummaryText += `\n💰 Tổng trả thưởng toàn sàn: +${formatCurrency(totalWin.toString())} VNĐ`;
+
   let imagePath = null;
   try {
     imagePath = await createMultiplayerTaiXiuImage({
@@ -329,42 +355,23 @@ async function resolveTaiXiuSession(api, threadId, session, messageObj) {
       totalPoolAmount: totalPool.toString(),
       totalWinAmount: totalWin.toString()
     });
+  } catch (canvasErr) {
+    console.error('Lỗi khi vẽ ảnh kết quả Tài Xỉu bàn:', canvasErr);
+  }
 
-    let summaryText =
-      `🎲═════════════════════════🎲\n` +
-      `   🔥 KẾT QUẢ TÀI XỈU CỘNG ĐỒNG 🔥\n` +
-      `🎲═════════════════════════🎲\n` +
-      `🎲 Xúc xắc: [ ${d1} ] - [ ${d2} ] - [ ${d3} ] ➔ ${total} điểm (${resultType})\n\n`;
-
-    if (winners.length > 0) {
-      summaryText += `🏆 THẮNG CƯỢC (${winners.length} người):\n`;
-      winners.slice(0, 5).forEach((w) => {
-        summaryText += `  • ${w.name}: +${formatCurrency(w.profit)} VNĐ [${w.choice}]\n`;
-      });
-      if (winners.length > 5) summaryText += `  • ... và ${winners.length - 5} người khác\n`;
-    } else {
-      summaryText += `💀 Không có người chơi nào thắng phiên này!\n`;
-    }
-
-    if (losers.length > 0) {
-      summaryText += `\n💀 THUA CƯỢC (${losers.length} người):\n`;
-      losers.slice(0, 5).forEach((l) => {
-        summaryText += `  • ${l.name}: -${formatCurrency(l.amount)} VNĐ [${l.choice}]\n`;
-      });
-      if (losers.length > 5) summaryText += `  • ... và ${losers.length - 5} người khác\n`;
-    }
-
-    summaryText += `\n💰 Tổng trả thưởng toàn sàn: +${formatCurrency(totalWin.toString())} VNĐ`;
-
+  try {
     await api.sendMessage(
-      { msg: summaryText, attachments: imagePath ? [imagePath] : [] },
+      { msg: txSummaryText, attachments: imagePath ? [imagePath] : [] },
       threadId,
       messageObj?.type
     );
-  } catch (err) {
-    console.error("Lỗi khi vẽ ảnh kết quả Tài Xỉu bàn:", err);
+  } catch (sendErr) {
+    console.error('Lỗi khi gửi kết quả TX bàn, fallback text:', sendErr.message);
+    try {
+      await api.sendMessage({ msg: txSummaryText }, threadId, messageObj?.type);
+    } catch (_) {}
   } finally {
-    if (imagePath) await clearImagePath(imagePath);
+    if (imagePath) clearImagePath(imagePath).catch(() => {});
   }
 }
 
@@ -412,6 +419,33 @@ async function resolveBauCuaSession(api, threadId, session, messageObj) {
     }
   });
 
+  const rolledNames = rolled.map((r) => `${r.icon} ${r.name}`).join(' - ');
+  let bcSummaryText =
+    `🎋═════════════════════════🎋\n` +
+    `   🔥 KẾT QUẢ BẦU CUA CỘNG ĐỒNG 🔥\n` +
+    `🎋═════════════════════════🎋\n` +
+    `🎲 Đĩa mở ra: [ ${rolledNames} ]\n\n`;
+
+  if (winners.length > 0) {
+    bcSummaryText += `🏆 THẮNG CƯỢC (${winners.length} người):\n`;
+    winners.slice(0, 5).forEach((w) => {
+      bcSummaryText += `  • ${w.name}: +${formatCurrency(w.profit)} VNĐ [${w.animalIcon} x${w.matches}]\n`;
+    });
+    if (winners.length > 5) bcSummaryText += `  • ... và ${winners.length - 5} người khác\n`;
+  } else {
+    bcSummaryText += `💀 Không có ai đoán trúng ván này!\n`;
+  }
+
+  if (losers.length > 0) {
+    bcSummaryText += `\n💀 THUA CƯỢC (${losers.length} người):\n`;
+    losers.slice(0, 5).forEach((l) => {
+      bcSummaryText += `  • ${l.name}: -${formatCurrency(l.amount)} VNĐ [${l.animalIcon}]\n`;
+    });
+    if (losers.length > 5) bcSummaryText += `  • ... và ${losers.length - 5} người khác\n`;
+  }
+
+  bcSummaryText += `\n💰 Tổng trả thưởng toàn sàn: +${formatCurrency(totalWin.toString())} VNĐ`;
+
   let imagePath = null;
   try {
     imagePath = await createMultiplayerBauCuaImage({
@@ -422,43 +456,23 @@ async function resolveBauCuaSession(api, threadId, session, messageObj) {
       totalPoolAmount: totalPool.toString(),
       totalWinAmount: totalWin.toString()
     });
+  } catch (canvasErr) {
+    console.error('Lỗi khi vẽ ảnh kết quả Bầu Cua bàn:', canvasErr);
+  }
 
-    const rolledNames = rolled.map((r) => `${r.icon} ${r.name}`).join(" - ");
-    let summaryText =
-      `🎋═════════════════════════🎋\n` +
-      `   🔥 KẾT QUẢ BẦU CUA CỘNG ĐỒNG 🔥\n` +
-      `🎋═════════════════════════🎋\n` +
-      `🎲 Đĩa mở ra: [ ${rolledNames} ]\n\n`;
-
-    if (winners.length > 0) {
-      summaryText += `🏆 THẮNG CƯỢC (${winners.length} người):\n`;
-      winners.slice(0, 5).forEach((w) => {
-        summaryText += `  • ${w.name}: +${formatCurrency(w.profit)} VNĐ [${w.animalIcon} x${w.matches}]\n`;
-      });
-      if (winners.length > 5) summaryText += `  • ... và ${winners.length - 5} người khác\n`;
-    } else {
-      summaryText += `💀 Không có ai đoán trúng ván này!\n`;
-    }
-
-    if (losers.length > 0) {
-      summaryText += `\n💀 THUA CƯỢC (${losers.length} người):\n`;
-      losers.slice(0, 5).forEach((l) => {
-        summaryText += `  • ${l.name}: -${formatCurrency(l.amount)} VNĐ [${l.animalIcon}]\n`;
-      });
-      if (losers.length > 5) summaryText += `  • ... và ${losers.length - 5} người khác\n`;
-    }
-
-    summaryText += `\n💰 Tổng trả thưởng toàn sàn: +${formatCurrency(totalWin.toString())} VNĐ`;
-
+  try {
     await api.sendMessage(
-      { msg: summaryText, attachments: imagePath ? [imagePath] : [] },
+      { msg: bcSummaryText, attachments: imagePath ? [imagePath] : [] },
       threadId,
       messageObj?.type
     );
-  } catch (err) {
-    console.error("Lỗi khi vẽ ảnh kết quả Bầu Cua bàn:", err);
+  } catch (sendErr) {
+    console.error('Lỗi khi gửi kết quả BC bàn, fallback text:', sendErr.message);
+    try {
+      await api.sendMessage({ msg: bcSummaryText }, threadId, messageObj?.type);
+    } catch (_) {}
   } finally {
-    if (imagePath) await clearImagePath(imagePath);
+    if (imagePath) clearImagePath(imagePath).catch(() => {});
   }
 }
 
