@@ -33,6 +33,9 @@ export async function gruopEvents(api, event) {
 
   const groupSettings = readGroupSettings();
   const threadSettings = groupSettings[threadId] || {};
+  if (threadSettings.activeBot === false) {
+    return;
+  }
   if ((type === GroupEventType.JOIN && !threadSettings.welcomeGroup) 
     || (type === GroupEventType.LEAVE && !threadSettings.byeGroup)) {
     return;

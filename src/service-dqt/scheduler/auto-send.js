@@ -204,6 +204,7 @@ async function processAutoSendJobs(api) {
   const now = Date.now();
 
   for (const threadId of Object.keys(groupSettings)) {
+    if (groupSettings[threadId]?.activeBot === false) continue;
     const config = ensureAutoSendConfig(groupSettings, threadId);
     if (!config.enabled) continue;
     if (config.nextSendAt > now) continue;

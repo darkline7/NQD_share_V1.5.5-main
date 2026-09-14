@@ -47,7 +47,11 @@ function startBot() {
 function stopBot() {
     if (botProcess && botProcess.pid) {
         try {
-            process.kill(-botProcess.pid);
+            if (isWin) {
+                spawn('taskkill', ['/pid', botProcess.pid.toString(), '/f', '/t']);
+            } else {
+                process.kill(-botProcess.pid);
+            }
             logManagerBot('Bot stopped');
             console.log('Bot stopped');
         } catch (err) {

@@ -131,10 +131,16 @@ export async function messagesUser(api, message) {
       }
 
 
+      const isBotActiveInGroup = groupSettings[threadId]?.activeBot !== false;
+
       let handleChat = true;
-      handleChat = !(await handleMute(api, message, groupSettings, isAdminBox, botIsAdminBox, isSelf));
-      handleChat = handleChat && !(await antiBadWord(api, message, groupSettings, isAdminBox, botIsAdminBox, isSelf));
-      handleChat = handleChat && !isUserBlocked(senderId);
+      if (isBotActiveInGroup) {
+        handleChat = !(await handleMute(api, message, groupSettings, isAdminBox, botIsAdminBox, isSelf));
+        handleChat = handleChat && !(await antiBadWord(api, message, groupSettings, isAdminBox, botIsAdminBox, isSelf));
+        handleChat = handleChat && !isUserBlocked(senderId);
+      } else {
+        handleChat = !isUserBlocked(senderId);
+      }
       const numberHandleCommand = await handleCommand(
         api,
         message,
@@ -146,7 +152,7 @@ export async function messagesUser(api, message) {
         isAdminBox,
         handleChat
       );
-      if (isPlainText) {
+      if (isBotActiveInGroup && isPlainText) {
         // numberHandleCommand = -1: Không Có Lệnh Nào Được Xử Lý
         // numberHandleCommand = 1: Đã xử lý lệnh thành viên
         // numberHandleCommand = 2: Bỏ Qua Xử Lý Lệnh Chat Bot
@@ -176,13 +182,15 @@ export async function messagesUser(api, message) {
         }
       }
 
-      await Promise.all([
-        antiNotText(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-        antiLink(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-        antiSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-        antiNude(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-        antiImageSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-      ]);
+      if (isBotActiveInGroup) {
+        await Promise.all([
+          antiNotText(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+          antiLink(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+          antiSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+          antiNude(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+          antiImageSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+        ]);
+      }
       break;
     }
   }

@@ -418,6 +418,21 @@
       "active": true
     },
     {
+      "name": "bot",
+      "description": "Bật/Tắt bot hoạt động trong nhóm",
+      "syntax": "{p}bot [on|off]",
+      "permission": "adminBox",
+      "countdown": 1,
+      "icon": "🤖",
+      "type": 3,
+      "author": "Thanh Bình",
+      "active": true,
+      "alias": [
+        "bot"
+      ]
+    },
+
+    {
       "name": "welcome",
       "description": "Chào mừng thành viên mới",
       "syntax": "{p}welcome [on|off]",

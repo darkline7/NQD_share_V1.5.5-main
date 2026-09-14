@@ -46,6 +46,8 @@ import { handleAntiNudeCommand } from "../service-dqt/anti-service/anti-nude/ant
 import { handleAntiImageSpamCommand } from "../service-dqt/anti-service/anti-image-spam.js";
 import { handleMuteScheduleCommand } from "../service-dqt/anti-service/mute-schedule.js";
 import { handleAutoReplyCommand } from "../service-dqt/chat-bot/auto-reply-private.js";
+import { handleBotControlCommand } from "./bot-manager/bot-control.js";
+
 import { handleSettingGroupCommand } from "./bot-manager/group-manage.js";
 import { handleJoinGroup, handleLeaveGroup, handleShowGroupsList } from "./bot-manager/remote-action-group.js";
 import { removeMention } from "../utils/format-util.js";
@@ -172,6 +174,7 @@ export async function sendReactionConfirmReceive(api, message, numHandleCommand)
 
 export function initGroupSettings(groupSettings, threadId, nameGroup) {
   const defaultSettings = {
+    activeBot: true,
     adminList: {},
     muteList: {},
     whileList: {},
@@ -351,6 +354,17 @@ export async function handleCommandPrivate(api, message) {
           await handleAutoReplyCommand(api, message, commandParts);
           return 0;
 
+        case "bot":
+          await api.sendMessage(
+            {
+              msg: "🤖 Lệnh /bot on và /bot off được sử dụng trực tiếp trong nhóm để Bật hoặc Tắt bot hoạt động trong nhóm đó.",
+              quote: message,
+            },
+            message.threadId,
+            message.type
+          );
+          return 0;
+
       }
     }
 
@@ -446,14 +460,21 @@ export async function handleCommand(
     return await handlePrefixCommand(api, message, threadId, isAdminLevelHighest);
   }
 
-  if (!content.startsWith(prefix)) {
+  const trimmedContent = content.trim();
+  const lowerContent = trimmedContent.toLowerCase();
+  const isNoPrefixBot = lowerContent === "bot" || lowerContent.startsWith("bot ");
+
+  if (!content.startsWith(prefix) && !isNoPrefixBot) {
     return numHandleCommand;
   }
 
   let commandParts;
   let command;
 
-  if (checkSpecialCommand(content, prefix)) {
+  if (isNoPrefixBot && !content.startsWith(prefix)) {
+    commandParts = trimmedContent.split(/\s+/);
+    command = "bot";
+  } else if (checkSpecialCommand(content, prefix)) {
     commandParts = content.split("_");
     command = commandParts[0].slice(prefix.length).toLowerCase();
   } else {
@@ -464,6 +485,11 @@ export async function handleCommand(
   if (HARD_DISABLED_COMMANDS.has(command)) {
     await sendMessageInsufficientAuthority(api, message, `Lệnh ${prefix}${command} hiện đã bị tắt trên bot.`);
     return 0;
+  }
+
+  const isBotActiveInGroup = groupSettings[threadId]?.activeBot !== false;
+  if (!isBotActiveInGroup && command !== "bot") {
+    return numHandleCommand;
   }
 
   if (!handleChat) return;
@@ -495,6 +521,17 @@ export async function handleCommand(
     command = commandInfo?.name || command;
 
     switch (command) {
+      case "bot":
+        isChangeSetting = await handleBotControlCommand(
+          api,
+          message,
+          groupSettings,
+          commandParts,
+          isAdminBox || isAdminBot || isAdminLevelHighest,
+          groupInfo?.name || ""
+        );
+        break;
+
       case "add":
       case "remove":
         await handleAdminHighLevelCommands(api, message, groupAdmins, groupSettings, isAdminLevelHighest);
