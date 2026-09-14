@@ -10,11 +10,20 @@ const groupSettingsPath = path.resolve("./assets/data/group_settings.json");
 const configFilePath = path.resolve("./assets/config.json");
 const commandFilePath = path.resolve("./assets/json-data/command.json");
 
+function parseJsonSafe(data, fallback) {
+  try {
+    const clean = typeof data === "string" ? data.replace(/^\uFEFF/, "") : data;
+    return JSON.parse(clean);
+  } catch (err) {
+    return fallback;
+  }
+}
+
 export function readConfig() {
   let config = {};
   try {
     const data = fs.readFileSync(configFilePath, "utf-8");
-    config = JSON.parse(data);
+    config = parseJsonSafe(data, {});
   } catch (error) {
     console.error("Lỗi đọc tệp config.json:", error);
     config = {};
@@ -26,7 +35,7 @@ export function readAdmins() {
   let admins = [];
   try {
     const data = fs.readFileSync(adminFilePath, "utf-8");
-    admins = JSON.parse(data);
+    admins = parseJsonSafe(data, []);
   } catch (error) {
     console.error("Lỗi đọc tệp admin:", error);
     admins = [];
@@ -128,7 +137,7 @@ export function logMessageToFile(data, type = "message") {
 export function readGroupSettings() {
   try {
     const data = fs.readFileSync(groupSettingsPath, "utf-8");
-    return JSON.parse(data);
+    return parseJsonSafe(data, {});
   } catch (error) {
     console.error("Lỗi khi đọc file group_settings.json:", error);
     return {};
@@ -146,7 +155,7 @@ export function writeGroupSettings(settings) {
 export function readCommandConfig() {
   try {
     const data = fs.readFileSync(commandFilePath, "utf-8");
-    return JSON.parse(data);
+    return parseJsonSafe(data, { commands: [] });
   } catch (error) {
     console.error("Lỗi khi đọc file command.json:", error);
     return { commands: [] };
@@ -165,7 +174,7 @@ const WEB_CONFIG_PATH = path.join(process.cwd(), "assets", "web-config", "web-co
 export function readWebConfig() {
   try {
     const data = fs.readFileSync(WEB_CONFIG_PATH, "utf-8");
-    return JSON.parse(data);
+    return parseJsonSafe(data, {});
   } catch (error) {
     console.error("Lỗi khi đọc file web-config.json:", error);
     return {};
@@ -181,7 +190,7 @@ const MANAGER_FILE_PATH = path.join(process.cwd(), "assets", "json-data", "manag
 export function readManagerFile() {
   try {
     const data = fs.readFileSync(MANAGER_FILE_PATH, "utf8");
-    let parsedData = JSON.parse(data);
+    let parsedData = parseJsonSafe(data, {});
     if (!parsedData) {
       parsedData = {};
     }
@@ -211,7 +220,12 @@ const PROPHYLACTIC_CONFIG_PATH = path.join(process.cwd(), "assets", "json-data",
 export function readProphylacticConfig() {
   try {
     const data = fs.readFileSync(PROPHYLACTIC_CONFIG_PATH, "utf8");
-    const parsedData = JSON.parse(data);
+    const parsedData = parseJsonSafe(data, {
+      prophylacticUploadAttachment: {
+        enable: false,
+        sizeLimitMB: 50,
+      },
+    });
     return parsedData;
   } catch (error) {
     console.error("Lỗi khi đọc file prophylactic.json:", error);
