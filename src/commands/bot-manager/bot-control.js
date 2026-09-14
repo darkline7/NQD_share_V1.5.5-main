@@ -90,16 +90,18 @@ export async function handleBotControlCommand(
   const currentStatus = groupSettings[threadId].activeBot !== false;
 
   if (!action || action === "status" || action === "info") {
-    const statusText = currentStatus ? "🟢 Đang BẬT" : "🔴 Đang TẮT";
+    const statusText = currentStatus ? "🟢 Đang BẬT" : "🔴 Đang TẮT (Chỉ giữ Anti & Cài đặt)";
     const groupTitle = nameGroup || groupSettings[threadId]?.nameGroup || "Nhóm hiện tại";
     const caption =
-      `🤖 TRẠNG THÁI BOT TRONG NHÓM\n` +
+      `🤖 TRẠNG THÁI TƯƠNG TÁC BOT TRONG NHÓM\n` +
       `• Nhóm: ${groupTitle}\n` +
-      `• Trạng thái: ${statusText}\n` +
+      `• Tương tác thành viên: ${statusText}\n` +
+      `• Chức năng bảo vệ Anti: 🟢 Luôn hoạt động\n` +
+      `• Chức năng cài đặt/quản trị: 🟢 Luôn hoạt động\n` +
       `──────────────────\n` +
       `💡 Hướng dẫn sử dụng:\n` +
-      `• ${prefix}bot on : Bật bot hoạt động trong nhóm\n` +
-      `• ${prefix}bot off : Tắt bot trong nhóm\n` +
+      `• ${prefix}bot on : Bật tương tác thành viên trong nhóm\n` +
+      `• ${prefix}bot off : Tắt tương tác thành viên (chức năng setting & anti vẫn hoạt động)\n` +
       `*(Chỉ Trưởng/Phó nhóm hoặc Quản trị Bot mới có thể Bật/Tắt)*`;
     await sendMessageQuery(api, message, caption);
     return false;
@@ -110,7 +112,7 @@ export async function handleBotControlCommand(
       await sendMessageWarning(
         api,
         message,
-        "⚠️ Bot hiện đã đang BẬT trong nhóm này rồi!"
+        "⚠️ Tương tác bot hiện đã đang BẬT trong nhóm này rồi!"
       );
       return false;
     }
@@ -119,7 +121,7 @@ export async function handleBotControlCommand(
     await sendMessageStateQuote(
       api,
       message,
-      "Đã BẬT bot trong nhóm thành công!\nBot đã sẵn sàng hoạt động trở lại.",
+      "Đã BẬT tương tác bot trong nhóm thành công!\nBot đã sẵn sàng trò chuyện, phản hồi lệnh và tương tác với thành viên.",
       true,
       300000
     );
@@ -131,7 +133,7 @@ export async function handleBotControlCommand(
       await sendMessageWarning(
         api,
         message,
-        "⚠️ Bot hiện đã đang TẮT trong nhóm này rồi!"
+        "⚠️ Tương tác bot hiện đã đang TẮT trong nhóm này rồi!"
       );
       return false;
     }
@@ -140,7 +142,7 @@ export async function handleBotControlCommand(
     await sendMessageStateQuote(
       api,
       message,
-      `Đã TẮT bot trong nhóm thành công!\nBot sẽ tạm dừng mọi hoạt động trong nhóm này cho đến khi Quản trị viên bật lại bằng "${prefix}bot on".`,
+      `Đã TẮT tương tác bot trong nhóm thành công!\nBot sẽ tạm dừng tương tác và phản hồi thành viên thường.\n💡 Lưu ý: Các chức năng bảo vệ Anti (chống sđt, link, spam, từ cấm, v.v.) và các lệnh cài đặt quản trị của Quản trị viên vẫn hoạt động bình thường.\nDùng "${prefix}bot on" để mở lại tương tác.`,
       false,
       300000
     );
@@ -150,7 +152,7 @@ export async function handleBotControlCommand(
   await sendMessageWarning(
     api,
     message,
-    `⚠️ Cú pháp Không hợp lệ. Vui lòng sử dụng:\n• ${prefix}bot on : Bật bot\n• ${prefix}bot off : Tắt bot`
+    `⚠️ Cú pháp Không hợp lệ. Vui lòng sử dụng:\n• ${prefix}bot on : Bật tương tác thành viên\n• ${prefix}bot off : Tắt tương tác thành viên (giữ anti & cài đặt)`
   );
   return false;
 }

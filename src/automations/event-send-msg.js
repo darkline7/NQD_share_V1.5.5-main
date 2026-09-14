@@ -134,14 +134,11 @@ export async function messagesUser(api, message) {
 
       const isBotActiveInGroup = groupSettings[threadId]?.activeBot !== false;
 
-      let handleChat = true;
-      if (isBotActiveInGroup) {
-        handleChat = !(await handleMute(api, message, groupSettings, isAdminBox, botIsAdminBox, isSelf));
-        handleChat = handleChat && !(await antiBadWord(api, message, groupSettings, isAdminBox, botIsAdminBox, isSelf));
-        handleChat = handleChat && !isUserBlocked(senderId);
-      } else {
-        handleChat = !isUserBlocked(senderId);
-      }
+      // Các chức năng bảo vệ nhóm Anti & Mute luôn luôn hoạt động
+      let handleChat = !(await handleMute(api, message, groupSettings, isAdminBox, botIsAdminBox, isSelf));
+      handleChat = handleChat && !(await antiBadWord(api, message, groupSettings, isAdminBox, botIsAdminBox, isSelf));
+      handleChat = handleChat && !isUserBlocked(senderId);
+
       const numberHandleCommand = await handleCommand(
         api,
         message,
@@ -153,6 +150,9 @@ export async function messagesUser(api, message) {
         isAdminBox,
         handleChat
       );
+
+      // Tương tác với thành viên (Chat bot, Game, Phản hồi trò chuyện)
+      // Chỉ hoạt động khi bot BẬT tương tác trong nhóm (isBotActiveInGroup !== false)
       if (isBotActiveInGroup && isPlainText) {
         // numberHandleCommand = -1: Không Có Lệnh Nào Được Xử Lý
         // numberHandleCommand = 1: Đã xử lý lệnh thành viên
@@ -183,16 +183,15 @@ export async function messagesUser(api, message) {
         }
       }
 
-      if (isBotActiveInGroup) {
-        await Promise.all([
-          antiNotText(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-          antiLink(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-          antiSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-          antiNude(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-          antiImageSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-          antiSdt(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-        ]);
-      }
+      // Các chức năng bảo vệ nhóm Anti luôn luôn hoạt động để bảo vệ nhóm
+      await Promise.all([
+        antiNotText(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+        antiLink(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+        antiSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+        antiNude(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+        antiImageSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+        antiSdt(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+      ]);
       break;
     }
   }

@@ -359,6 +359,7 @@ pm2 restart zlbot
 | **manager** | Không | `{p}manager` | 5s | Xem toàn bộ danh sách lệnh quản trị viên được phép dùng trong nhóm. |
 | **listmute** | Không | `{p}listmute` | 1s | Xem danh sách các thành viên hiện đang bị cấm chat (mute) trong nhóm. |
 | **settinggroup** | `stg` | `{p}settinggroup <loại> <on\|off\|0\|1>` | 0s | Sửa đổi các cài đặt của nhóm (như khóa link, kiểm duyệt...). |
+| **bot** | Không | `{p}bot [on\|off\|status]` | 1s | Bật/tắt tương tác của bot với thành viên trong nhóm (khi tắt, bot không trò chuyện/chơi game với thành viên thường, nhưng các chức năng bảo vệ Anti và lệnh cài đặt của Quản trị viên vẫn hoạt động bình thường). |
 | **changelink** | Không | `{p}changelink` | 0s | Tạo lại link tham gia nhóm ngẫu nhiên mới (vô hiệu hóa link cũ). |
 
 ---

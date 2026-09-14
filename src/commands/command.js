@@ -494,8 +494,23 @@ export async function handleCommand(
   }
 
   const isBotActiveInGroup = groupSettings[threadId]?.activeBot !== false;
-  if (!isBotActiveInGroup && command !== "bot") {
-    return numHandleCommand;
+  const isAnyAdmin = isAdminBox || isAdminBot || isAdminLevelHighest;
+
+  if (!isBotActiveInGroup) {
+    // Khi bot đang TẮT tương tác thành viên trong nhóm (/bot off):
+    // 1. Thành viên thường hoàn toàn không tương tác được bất kỳ lệnh nào (im lặng bỏ qua)
+    if (!isAnyAdmin) {
+      return numHandleCommand;
+    }
+
+    // 2. Đối với Quản trị viên (Trưởng/Phó nhóm, Admin Bot, Super Admin):
+    // Vẫn cho phép sử dụng tất cả các lệnh quản lý, cài đặt nhóm và lệnh anti (/setting, /antisdt, /antilink, /bot, /mute, v.v.)
+    // Bỏ qua các lệnh tương tác giải trí của thành viên thường (permission: 'all', type: 1)
+    const cmdCheck = getCommand(command, getCommandConfig().commands);
+    const isMemberOnlyCmd = cmdCheck && cmdCheck.permission === "all" && cmdCheck.type === 1 && command !== "bot" && command !== "detail";
+    if (isMemberOnlyCmd) {
+      return numHandleCommand;
+    }
   }
 
   if (!handleChat) return;

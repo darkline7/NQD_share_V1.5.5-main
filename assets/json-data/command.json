@@ -419,8 +419,8 @@
     },
     {
       "name": "bot",
-      "description": "Bật/Tắt bot hoạt động trong nhóm",
-      "syntax": "{p}bot [on|off]",
+      "description": "Bật/Tắt tương tác của bot với thành viên (Anti và lệnh Cài đặt vẫn hoạt động)",
+      "syntax": "{p}bot [on|off|status]",
       "permission": "adminBox",
       "countdown": 1,
       "icon": "🤖",

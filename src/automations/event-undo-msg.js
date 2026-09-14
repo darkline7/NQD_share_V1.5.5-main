@@ -19,9 +19,6 @@ export async function undoMessageEvents(api, undo) {
     const botIsAdminBox = groupAdmins.includes(idBot.toString());
     const groupSettings = readGroupSettings();
     initGroupSettings(groupSettings, threadId, groupInfo.name);
-    if (groupSettings[threadId]?.activeBot === false) {
-      return;
-    }
 
     await antiUndoGroup(api, undo, isAdminLevelHighest, groupSettings, botIsAdminBox, isSelf);
   }
