@@ -381,6 +381,7 @@ pm2 restart zlbot
 | **antispam** | `xoaspam` | `{p}antispam [on\|off]` | 1s | Tự động phát hiện và cảnh báo/xóa tin nhắn spam liên tục. |
 | **antinude** | `chongnude` | `{p}antinude [on\|off]` | 1s | Quét hình ảnh bằng AI (NSFW/Nude) và tự động thu hồi/xóa ảnh nhạy cảm. |
 | **antiundo** | `chongundo` | `{p}antiundo [on\|off]` | 1s | Chống thu hồi tin nhắn: khi có ai thu hồi tin nhắn, bot sẽ gửi lại nội dung đó. |
+| **antisdt** | `chongsdt`, `locsdt`, `xoasdt`, `antiphone` | `{p}antisdt [on\|off\|status]`<br>`{p}antisdt test <nội dung>` | 1s | Chống chia sẻ số điện thoại trong nhóm. Tự động thu hồi tin nhắn chứa SĐT và cảnh cáo/mute khi vi phạm nhiều lần. |
 | **onlytext** | Không | `{p}onlytext [on\|off]` | 1s | Nhóm chỉ gửi tin nhắn văn bản (tự xóa ảnh, video, sticker, file...). |
 | **learn** | `learnnow`, `unlearn` | `{p}learn [câu hỏi] => [câu trả lời]`<br>`{p}learnnow_[câu hỏi]_[câu trả lời]`<br>`{p}unlearn [câu hỏi]` | 1s | Dạy bot trả lời tự động khi thành viên trò chuyện hoặc xóa câu trả lời đã học. |
 | **reply** | Không | `{p}reply [on\|off]` | 1s | Bật/tắt chế độ bot tự động trả lời tin nhắn bằng dữ liệu đã học/AI. |

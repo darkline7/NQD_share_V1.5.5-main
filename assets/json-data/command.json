@@ -528,6 +528,23 @@
       "active": true
     },
     {
+      "name": "antisdt",
+      "alias": [
+        "chongsdt",
+        "locsdt",
+        "xoasdt",
+        "antiphone"
+      ],
+      "description": "Chống chia sẻ số điện thoại trong nhóm",
+      "syntax": "{p}antisdt [on|off|status] || {p}antisdt test <nội dung>",
+      "permission": "adminBox",
+      "countdown": 1,
+      "icon": "📞",
+      "type": 3,
+      "author": "Thanh Bình",
+      "active": true
+    },
+    {
       "name": "onlytext",
       "alias": [
         "vanban"

@@ -41,6 +41,12 @@ export const changeStatusConfig = async ({ api, groupId, groupName, command, isA
     case "antiUndo":
       groupSettings[groupId].antiUndo = isActive;
       break;
+    case "antiImageSpam":
+      groupSettings[groupId].antiImageSpam = isActive;
+      break;
+    case "antiSdt":
+      groupSettings[groupId].antiSdt = isActive;
+      break;
     case "sendTask":
       groupSettings[groupId].sendTask = isActive;
       break;

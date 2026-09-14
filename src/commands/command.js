@@ -44,6 +44,7 @@ import {
 import { handleMusicCommand } from "../service-dqt/api-crawl/music/soundcloud.js";
 import { handleAntiNudeCommand } from "../service-dqt/anti-service/anti-nude/anti-nude.js";
 import { handleAntiImageSpamCommand } from "../service-dqt/anti-service/anti-image-spam.js";
+import { handleAntiSdtCommand } from "../service-dqt/anti-service/anti-sdt.js";
 import { handleMuteScheduleCommand } from "../service-dqt/anti-service/mute-schedule.js";
 import { handleAutoReplyCommand } from "../service-dqt/chat-bot/auto-reply-private.js";
 import { handleBotControlCommand } from "./bot-manager/bot-control.js";
@@ -193,6 +194,7 @@ export function initGroupSettings(groupSettings, threadId, nameGroup) {
     memberApprove: false,
     antiNude: false,
     antiImageSpam: false,
+    antiSdt: false,
     muteSchedule: { enabled: false, startHour: 22, endHour: 6 },
     whiteList: {},
     autoSend: {
@@ -665,6 +667,14 @@ export async function handleCommand(
 
       case "antianh":
         isChangeSetting = await handleAntiImageSpamCommand(api, message, groupSettings);
+        break;
+
+      case "antisdt":
+      case "chongsdt":
+      case "locsdt":
+      case "xoasdt":
+      case "antiphone":
+        isChangeSetting = await handleAntiSdtCommand(api, message, groupSettings);
         break;
 
       case "mutegiochinh":
