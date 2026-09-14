@@ -10,6 +10,7 @@ import { antiSpam } from "../service-dqt/anti-service/anti-spam.js";
 import { antiBadWord } from "../service-dqt/anti-service/anti-badword.js";
 import { antiNotText } from "../service-dqt/anti-service/anti-not-text.js";
 import { handleMute } from "../service-dqt/anti-service/mute-user.js";
+import { antiImageSpam } from "../service-dqt/anti-service/anti-image-spam.js";
 
 import { handleOnChatUser, handleOnReplyFromUser } from "../service-dqt/service.js";
 
@@ -171,7 +172,8 @@ export async function messagesUser(api, message) {
         antiNotText(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
         antiLink(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
         antiSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
-        antiNude(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf)
+        antiNude(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
+        antiImageSpam(api, message, isAdminBox, groupSettings, botIsAdminBox, isSelf),
       ]);
       break;
     }

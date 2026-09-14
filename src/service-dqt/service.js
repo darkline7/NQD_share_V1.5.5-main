@@ -12,6 +12,8 @@ import { handleScanGroupsReply } from "../commands/bot-manager/scan-group.js";
 import { startAntiConfigCheck } from "./anti-service/index.js";
 import { initializeCacheService } from "../utils/link-platform-cache.js";
 import { handleQuickBetChat } from "./game-service/index.js";
+import { startMuteScheduleCheck } from "./anti-service/mute-schedule.js";
+
 
 
 let globalPrefix = "@";
@@ -37,6 +39,7 @@ export async function initService(api) {
     startBadWordViolationCheck(),
     startNudeViolationCheck(),
     notifyResetGroup(api),
+    startMuteScheduleCheck(api),
   ]);
 }
 

@@ -1,4 +1,4 @@
-{
+﻿{
     "prefix":  "/",
     "commands":  [
                      {
@@ -131,144 +131,143 @@
                          "author":  "Thanh Bình",
                          "active":  true
                      },
-                      {
-                          "name":  "game",
-                          "alias":  [
-                                        "minigame",
-                                        "trochoi"
-                                    ],
-                          "description":  "Xem hướng dẫn các trò chơi và lệnh kinh tế",
-                          "syntax":  "{p}game",
-                          "permission":  "all",
-                          "countdown":  3,
-                          "icon":  "🎮",
-                          "type":  1,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-                      {
-                          "name":  "diemdanh",
-                          "alias":  [
-                                        "daily",
-                                        "dd"
-                                    ],
-                          "description":  "Điểm danh hàng ngày nhận 20k - 60k xu may mắn",
-                          "syntax":  "{p}diemdanh",
-                          "permission":  "all",
-                          "countdown":  5,
-                          "icon":  "🎁",
-                          "type":  1,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-                      {
-                          "name":  "vi",
-                          "alias":  [
-                                        "balance",
-                                        "cash",
-                                        "tien",
-                                        "wallet"
-                                    ],
-                          "description":  "Xem thẻ tài khoản game, avatar và số dư của bạn hoặc người được tag",
-                          "syntax":  "{p}vi || {p}vi [@tag]",
-                          "permission":  "all",
-                          "countdown":  5,
-                          "icon":  "💳",
-                          "type":  1,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-                      {
-                          "name":  "bank",
-                          "alias":  [
-                                        "chuyentien",
-                                        "pay"
-                                    ],
-                          "description":  "Chuyển tiền cho thành viên khác trong nhóm",
-                          "syntax":  "{p}bank [@người_nhận] [số_tiền]",
-                          "permission":  "all",
-                          "countdown":  5,
-                          "icon":  "💸",
-                          "type":  1,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-                      {
-                          "name":  "top",
-                          "alias":  [
-                                        "bxh",
-                                        "topgame"
-                                    ],
-                          "description":  "Xem bảng xếp hạng Top 10 đại gia game sở hữu nhiều xu nhất",
-                          "syntax":  "{p}top",
-                          "permission":  "all",
-                          "countdown":  5,
-                          "icon":  "🏆",
-                          "type":  1,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-                      {
-                          "name":  "taixiu",
-                          "alias":  [
-                                        "tx",
-                                        "txb",
-                                        "taixiuban"
-                                    ],
-                          "description":  "Chơi Tài Xỉu solo hoặc mở bàn cược 60s cả nhóm cùng chơi",
-                          "syntax":  "{p}tx [tai/xiu] [tiền] | {p}tx open | {p}txb",
-                          "permission":  "all",
-                          "countdown":  3,
-                          "icon":  "🎲",
-                          "type":  1,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-                      {
-                          "name":  "baucua",
-                          "alias":  [
-                                        "bc",
-                                        "bcb",
-                                        "baucuaban"
-                                    ],
-                          "description":  "Chơi Bầu Cua Tôm Cá solo hoặc mở bàn cược 60s nhóm",
-                          "syntax":  "{p}bc [linh_vật] [tiền] | {p}bc open | {p}bcb",
-                          "permission":  "all",
-                          "countdown":  3,
-                          "icon":  "🎋",
-                          "type":  1,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-                      {
-                          "name":  "keobuabao",
-                          "alias":  [
-                                        "kbb"
-                                    ],
-                          "description":  "Chơi Kéo Búa Bao với Bot",
-                          "syntax":  "{p}kbb [keo/bua/bao] [số_tiền]",
-                          "permission":  "all",
-                          "countdown":  3,
-                          "icon":  "⚔️",
-                          "type":  1,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-                      {
-                          "name":  "givemoney",
-                          "alias":  [
-                                        "setmoney"
-                                    ],
-                          "description":  "Cấp tiền game cho người chơi (Admin Bot)",
-                          "syntax":  "{p}givemoney [@tag] [số_tiền]",
-                          "permission":  "adminBot",
-                          "countdown":  1,
-                          "icon":  "👑",
-                          "type":  2,
-                          "author":  "DQT",
-                          "active":  true
-                      },
-
+                     {
+                         "name":  "game",
+                         "alias":  [
+                                       "minigame",
+                                       "trochoi"
+                                   ],
+                         "description":  "Xem hướng dẫn các trò chơi và lệnh kinh tế",
+                         "syntax":  "{p}game",
+                         "permission":  "all",
+                         "countdown":  3,
+                         "icon":  "🎮",
+                         "type":  1,
+                         "author":  "DQT",
+                         "active":  true
+                     },
+                     {
+                         "name":  "diemdanh",
+                         "alias":  [
+                                       "daily",
+                                       "dd"
+                                   ],
+                         "description":  "Điểm danh hàng ngày nhận 20k - 60k xu may mắn",
+                         "syntax":  "{p}diemdanh",
+                         "permission":  "all",
+                         "countdown":  5,
+                         "icon":  "🎁",
+                         "type":  1,
+                         "author":  "DQT",
+                         "active":  true
+                     },
+                     {
+                         "name":  "vi",
+                         "alias":  [
+                                       "balance",
+                                       "cash",
+                                       "tien",
+                                       "wallet"
+                                   ],
+                         "description":  "Xem thẻ tài khoản game, avatar và số dư của bạn hoặc người được tag",
+                         "syntax":  "{p}vi || {p}vi [@tag]",
+                         "permission":  "all",
+                         "countdown":  5,
+                         "icon":  "💳",
+                         "type":  1,
+                         "author":  "DQT",
+                         "active":  true
+                     },
+                     {
+                         "name":  "bank",
+                         "alias":  [
+                                       "chuyentien",
+                                       "pay"
+                                   ],
+                         "description":  "Chuyển tiền cho thành viên khác trong nhóm",
+                         "syntax":  "{p}bank [@người_nhận] [số_tiền]",
+                         "permission":  "all",
+                         "countdown":  5,
+                         "icon":  "💸",
+                         "type":  1,
+                         "author":  "DQT",
+                         "active":  true
+                     },
+                     {
+                         "name":  "top",
+                         "alias":  [
+                                       "bxh",
+                                       "topgame"
+                                   ],
+                         "description":  "Xem bảng xếp hạng Top 10 đại gia game sở hữu nhiều xu nhất",
+                         "syntax":  "{p}top",
+                         "permission":  "all",
+                         "countdown":  5,
+                         "icon":  "🏆",
+                         "type":  1,
+                         "author":  "DQT",
+                         "active":  true
+                     },
+                     {
+                         "name":  "taixiu",
+                         "alias":  [
+                                       "tx",
+                                       "txb",
+                                       "taixiuban"
+                                   ],
+                         "description":  "Chơi Tài Xỉu solo hoặc mở bàn cược 60s cả nhóm cùng chơi",
+                         "syntax":  "{p}tx [tai/xiu] [tiền] | {p}tx open | {p}txb",
+                         "permission":  "all",
+                         "countdown":  3,
+                         "icon":  "🎲",
+                         "type":  1,
+                         "author":  "DQT",
+                         "active":  true
+                     },
+                     {
+                         "name":  "baucua",
+                         "alias":  [
+                                       "bc",
+                                       "bcb",
+                                       "baucuaban"
+                                   ],
+                         "description":  "Chơi Bầu Cua Tôm Cá solo hoặc mở bàn cược 60s nhóm",
+                         "syntax":  "{p}bc [linh_vật] [tiền] | {p}bc open | {p}bcb",
+                         "permission":  "all",
+                         "countdown":  3,
+                         "icon":  "🎋",
+                         "type":  1,
+                         "author":  "DQT",
+                         "active":  true
+                     },
+                     {
+                         "name":  "keobuabao",
+                         "alias":  [
+                                       "kbb"
+                                   ],
+                         "description":  "Chơi Kéo Búa Bao với Bot",
+                         "syntax":  "{p}kbb [keo/bua/bao] [số_tiền]",
+                         "permission":  "all",
+                         "countdown":  3,
+                         "icon":  "⚔️",
+                         "type":  1,
+                         "author":  "DQT",
+                         "active":  true
+                     },
+                     {
+                         "name":  "givemoney",
+                         "alias":  [
+                                       "setmoney"
+                                   ],
+                         "description":  "Cấp tiền game cho người chơi (Admin Bot)",
+                         "syntax":  "{p}givemoney [@tag] [số_tiền]",
+                         "permission":  "adminBot",
+                         "countdown":  1,
+                         "icon":  "👑",
+                         "type":  2,
+                         "author":  "DQT",
+                         "active":  true
+                     },
                      {
                          "name":  "manager",
                          "description":  "Xem toàn bộ danh sách lệnh admin",
@@ -815,6 +814,35 @@
                          "type":  1,
                          "author":  "Thanh Bình",
                          "active":  true
+                     },
+                     {
+                         "name":  "antianh",
+                         "description":  "Bật/tắt chống spam ảnh (\u003e5 ảnh/h cảnh cáo, \u003e10 mute 30p, \u003e15 chặn)",
+                         "syntax":  "{p}antianh [on|off]",
+                         "permission":  "adminBox",
+                         "countdown":  3,
+                         "icon":  "🖼️",
+                         "type":  2,
+                         "author":  "Thanh Bình",
+                         "active":  true,
+                         "alias":  [
+                                       "antispamimage"
+                                   ]
+                     },
+                     {
+                         "name":  "mutegiochinh",
+                         "description":  "Cài lịch mute tự động theo giờ mỗi ngày (VD: 22h-6h)",
+                         "syntax":  "{p}mutegiochinh [giờ_bắt_đầu] [giờ_kết_thúc] | on | off",
+                         "permission":  "adminBox",
+                         "countdown":  3,
+                         "icon":  "⏰",
+                         "type":  2,
+                         "author":  "Thanh Bình",
+                         "active":  true,
+                         "alias":  [
+                                       "lichmute",
+                                       "mutegc"
+                                   ]
                      }
                  ]
 }

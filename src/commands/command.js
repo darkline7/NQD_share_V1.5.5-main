@@ -43,6 +43,8 @@ import {
 } from "../service-dqt/chat-zalo/chat-special/send-voice/send-voice.js";
 import { handleMusicCommand } from "../service-dqt/api-crawl/music/soundcloud.js";
 import { handleAntiNudeCommand } from "../service-dqt/anti-service/anti-nude/anti-nude.js";
+import { handleAntiImageSpamCommand } from "../service-dqt/anti-service/anti-image-spam.js";
+import { handleMuteScheduleCommand } from "../service-dqt/anti-service/mute-schedule.js";
 import { handleSettingGroupCommand } from "./bot-manager/group-manage.js";
 import { handleJoinGroup, handleLeaveGroup, handleShowGroupsList } from "./bot-manager/remote-action-group.js";
 import { removeMention } from "../utils/format-util.js";
@@ -186,6 +188,8 @@ export function initGroupSettings(groupSettings, threadId, nameGroup) {
     onlyText: false,
     memberApprove: false,
     antiNude: false,
+    antiImageSpam: false,
+    muteSchedule: { enabled: false, startHour: 22, endHour: 6 },
     whiteList: {},
     autoSend: {
       enabled: false,
@@ -612,6 +616,14 @@ export async function handleCommand(
 
       case "antinude":
         isChangeSetting = await handleAntiNudeCommand(api, message, groupSettings);
+        break;
+
+      case "antianh":
+        isChangeSetting = await handleAntiImageSpamCommand(api, message, groupSettings);
+        break;
+
+      case "mutegiochinh":
+        isChangeSetting = await handleMuteScheduleCommand(api, message, groupSettings);
         break;
 
       case "antiundo":
