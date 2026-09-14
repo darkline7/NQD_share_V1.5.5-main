@@ -45,6 +45,7 @@ import { handleMusicCommand } from "../service-dqt/api-crawl/music/soundcloud.js
 import { handleAntiNudeCommand } from "../service-dqt/anti-service/anti-nude/anti-nude.js";
 import { handleAntiImageSpamCommand } from "../service-dqt/anti-service/anti-image-spam.js";
 import { handleMuteScheduleCommand } from "../service-dqt/anti-service/mute-schedule.js";
+import { handleAutoReplyCommand } from "../service-dqt/chat-bot/auto-reply-private.js";
 import { handleSettingGroupCommand } from "./bot-manager/group-manage.js";
 import { handleJoinGroup, handleLeaveGroup, handleShowGroupsList } from "./bot-manager/remote-action-group.js";
 import { removeMention } from "../utils/format-util.js";
@@ -346,6 +347,9 @@ export async function handleCommandPrivate(api, message) {
         case "givemoney":
           await handleAdminMoneyCommand(api, message, isAdminBot);
           return 0;
+        case "autoreply":
+          await handleAutoReplyCommand(api, message, commandParts);
+          return 0;
 
       }
     }
@@ -624,6 +628,10 @@ export async function handleCommand(
 
       case "mutegiochinh":
         isChangeSetting = await handleMuteScheduleCommand(api, message, groupSettings);
+        break;
+
+      case "autoreply":
+        await handleAutoReplyCommand(api, message, commandParts);
         break;
 
       case "antiundo":

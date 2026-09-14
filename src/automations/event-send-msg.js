@@ -11,6 +11,7 @@ import { antiBadWord } from "../service-dqt/anti-service/anti-badword.js";
 import { antiNotText } from "../service-dqt/anti-service/anti-not-text.js";
 import { handleMute } from "../service-dqt/anti-service/mute-user.js";
 import { antiImageSpam } from "../service-dqt/anti-service/anti-image-spam.js";
+import { handleAutoReplyPrivate } from "../service-dqt/chat-bot/auto-reply-private.js";
 
 import { handleOnChatUser, handleOnReplyFromUser } from "../service-dqt/service.js";
 
@@ -90,6 +91,13 @@ export async function messagesUser(api, message) {
         if (continueProcessingChat) {
           const commandResult = await handleCommandPrivate(api, message);
           continueProcessingChat = continueProcessingChat && commandResult === 1 && !isSelf;
+        }
+        if (continueProcessingChat) {
+          await handleAutoReplyPrivate(api, message);
+        }
+      } else {
+        if (!isSelf && !isUserBlocked(senderId)) {
+          await handleAutoReplyPrivate(api, message);
         }
       }
       break;
