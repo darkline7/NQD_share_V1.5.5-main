@@ -7,6 +7,7 @@ import natural from "natural";
 import { removeMention } from "../../../utils/format-util.js";
 import { callGroqAi, getGroqAiStatus, isRedfingerSupportGroup, getEffectiveAiPrompt } from "../../../utils/groq-ai.js";
 import { handleMixuKeyAutoResponse } from "../mixu-key-service.js";
+import { appContext } from "../../../api-zalo/context.js";
 
 const dataTrainingPath = path.resolve(process.cwd(), "assets", "json-data", "data-training.json");
 const aiCooldownByThread = new Map();
@@ -51,61 +52,125 @@ function rememberAiTurn(threadId, userContent, assistantContent) {
   aiHistoryByThread.set(threadId, history.slice(-10));
 }
 
+function isQuoteFromBot(message) {
+  const quote = message?.data?.quote;
+  if (!quote) return false;
+  const botId = String(appContext.uid || "");
+  if (botId && botId !== "-1") {
+    if (String(quote.uidFrom) === botId || String(quote.ownerId) === botId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function isBotMentioned(content, message) {
+  const botId = String(appContext.uid || "");
+  // 1. Kiểm tra qua mảng mentions của Zalo
+  if (message?.data?.mentions && Array.isArray(message.data.mentions)) {
+    if (botId && botId !== "-1") {
+      const hasBotMention = message.data.mentions.some(
+        (m) => String(m.uid) === botId
+      );
+      if (hasBotMention) return true;
+    }
+  }
+
+  // 2. Kiểm tra tag @bot, @zlbot hoặc gọi bot trong nội dung text
+  const clean = String(content || "").toLowerCase();
+  if (/@\s*(zlbot|bot)\b/i.test(clean)) return true;
+  if (/\b(zlbot|bot)\b/i.test(clean)) return true;
+
+  return false;
+}
+
 function isRedfingerRelevantMessage(content, message) {
   if (typeof content !== "string") return false;
   const trimmed = content.trim();
   if (trimmed.length < 2) return false;
 
-  // 1. Phản hồi tiếp khi thành viên bấm reply / quote tin nhắn
-  if (message?.data?.quote) {
+  // 1. Người dùng trực tiếp tag hoặc gọi Bot -> Luôn xử lý
+  if (isBotMentioned(content, message)) {
     return true;
+  }
+
+  // 2. Người dùng bấm reply / quote tin nhắn:
+  // CHỈ trả lời nếu người dùng đang quote tin nhắn của chính Bot!
+  // Tuyệt đối KHÔNG xen vào khi 2 thành viên quote nhau nói chuyện riêng.
+  if (message?.data?.quote) {
+    return isQuoteFromBot(message);
   }
 
   const clean = trimmed.toLowerCase();
 
-  // 2. Nhắc đến bot, admin, cskh, support
-  if (/\b(bot|redfinger|rf|cskh|support|ad|admin|tro ly|trợ lý)\b/i.test(clean)) {
+  // 3. Nhắc đến cskh, support, trợ lý trong nhóm Redfinger
+  if (/\b(cskh|support|tro ly|trợ lý)\b/i.test(clean)) {
     return true;
   }
 
-  // 3. Chứa các từ khóa dịch vụ Redfinger / Cloud Phone / Mã code / Thanh toán
+  // 4. Chứa các từ khóa dịch vụ Redfinger / Cloud Phone / Mã code / Đa acc / Game
   const serviceKeywords = [
-    "mã", "code", "redeem", "key", "cloud", "phone", "đám mây", "dam may",
+    "redfinger", "rf", "cloud phone", "cloudphone", "cloud emulator", "cloudemulator",
+    "mã", "code", "redeem", "key", "cloud", "phone", "đám mây", "dam may", "máy ảo", "may ao",
     "vip", "kvip", "svip", "xvip", "hết hàng", "het hang",
     "nạp", "nap", "tiền", "tien", "giá", "gia", "thuê", "thue", "mua", "bán", "ban",
     "treo", "game", "roblox", "võ lâm", "vo lam", "server", "máy chủ", "may chu",
     "đổi server", "doi server", "replace", "gia hạn", "gia han", "thêm mới", "them moi",
-    "tài khoản", "tai khoan", "đăng nhập", "dang nhap", "app", "momo", "ngân hàng", "ngan hang"
+    "tài khoản", "tai khoan", "đăng nhập", "dang nhap", "app", "momo", "ngân hàng", "ngan hang",
+    "nhiều acc", "nhieu acc", "đa acc", "da acc", "nhiều nick", "nhieu nick", "cùng máy", "cung may",
+    "1 máy", "một máy", "chơi cùng lúc", "treo cùng lúc", "chạy cùng lúc", "giantic"
   ];
-  if (serviceKeywords.some((kw) => clean.includes(kw))) {
-    return true;
-  }
+  const hasServiceKw = serviceKeywords.some((kw) => clean.includes(kw));
 
-  // 4. Chứa các từ để hỏi hoặc câu hỏi tư vấn
+  // 5. Chứa các từ để hỏi hoặc câu hỏi tư vấn
   const questionKeywords = [
     "?", "sao", "làm sao", "lam sao", "thế nào", "the nao", "như nào", "nhu nao",
     "bao nhiêu", "bao nhieu", "bn", "ở đâu", "o dau", "được không", "duoc khong",
     "đc ko", "dc ko", "ko đc", "không được", "hướng dẫn", "huong dan", "chỉ em",
-    "chi em", "chỉ mình", "chi minh", "giúp", "giup", "hỗ trợ", "ho tro", "lỗi", "loi"
+    "chi em", "chỉ mình", "chi minh", "giúp", "giup", "hỗ trợ", "ho tro", "lỗi", "loi",
+    "có cách nào", "co cach nao", "cách nào", "cach nao", "chơi được", "choi duoc",
+    "cho mình hỏi", "cho em hỏi", "cho hỏi", "tư vấn", "tu van", "xin hỏi"
   ];
-  if (questionKeywords.some((kw) => clean.includes(kw))) {
+  const hasQuestionKw = questionKeywords.some((kw) => clean.includes(kw));
+
+  // Trong nhóm Redfinger: Tự động trả lời khi chứa từ khóa dịch vụ kết hợp câu hỏi,
+  // hoặc nhắc thẳng đến Redfinger / Cloud Phone / Mã code / Hết hàng / Nhiều acc
+  if (hasServiceKw && hasQuestionKw) {
+    return true;
+  }
+  if (
+    clean.includes("redfinger") ||
+    clean.includes("cloud phone") ||
+    clean.includes("cloudphone") ||
+    clean.includes("redeem code") ||
+    clean.includes("hết hàng") ||
+    clean.includes("nhiều acc") ||
+    clean.includes("đa acc")
+  ) {
     return true;
   }
 
   return false;
 }
 
-async function findGroqResponse(content, threadId, senderName, nameGroup, isRedfinger = false) {
+async function findGroqResponse(content, threadId, senderName, nameGroup, isRedfinger = false, message = null) {
   if (!isRedfinger && !shouldUseGroqAi(content)) return null;
   if (!canUseGroqAi(threadId)) return null;
 
   try {
-    const prompt = [
+    const promptParts = [
       `Nhóm: ${nameGroup || threadId}`,
       `Người gửi: ${senderName}`,
-      `Tin nhắn: ${content}`,
-    ].join("\n");
+    ];
 
+    if (message?.data?.quote?.msg) {
+      const quoteAuthor = message.data.quote.fromD || "Người dùng";
+      promptParts.push(`[Nội dung tin nhắn được reply/quote từ "${quoteAuthor}": "${message.data.quote.msg}"]`);
+    }
+
+    promptParts.push(`Tin nhắn: ${content}`);
+
+    const prompt = promptParts.join("\n");
     const systemPrompt = getEffectiveAiPrompt(threadId, nameGroup);
 
     const answer = await callGroqAi(prompt, {
@@ -137,15 +202,17 @@ export async function handleChatBot(api, message, threadId, groupSettings, nameG
   if (isRegularChatMessage(content)) {
     if (isRedfinger) {
       // Trong nhóm Cộng đồng Redfinger Việt Nam:
-      // KHÔNG CẦN TAG BOT! Tự động trả lời khi nhận diện câu hỏi hoặc nhắc đến dịch vụ
+      // Tự động trả lời khi được tag/gọi bot, khi quote tin nhắn của bot, hoặc hỏi về dịch vụ Redfinger
       if (isRedfingerRelevantMessage(content, message)) {
-        response = await findGroqResponse(content, threadId, senderName, nameGroup, true);
+        response = await findGroqResponse(content, threadId, senderName, nameGroup, true, message);
       }
-    } else if (groupSettings[threadId]?.replyEnabled) {
-      // Các nhóm khác ngoài Redfinger
+    } else if (groupSettings[threadId]?.replyEnabled || groupSettings[threadId]?.aiEnabled || isBotMentioned(content, message)) {
+      // Các nhóm khác ngoài Redfinger:
+      // 1. Kiểm tra câu trả lời từ dữ liệu học riêng của nhóm
       response = findResponse(content, threadId);
-      if (!response && groupSettings[threadId]?.aiEnabled) {
-        response = await findGroqResponse(content, threadId, senderName, nameGroup, false);
+      // 2. Nếu không có câu trả lời học sẵn và AI được bật (hoặc thành viên tag trực tiếp bot)
+      if (!response && (groupSettings[threadId]?.aiEnabled || isBotMentioned(content, message))) {
+        response = await findGroqResponse(content, threadId, senderName, nameGroup, false, message);
       }
     }
   }
