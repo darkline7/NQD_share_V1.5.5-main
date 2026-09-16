@@ -1,0 +1,85 @@
+{
+  "brand": "Redfinger Việt Nam",
+  "website": "https://redfinger.vn",
+  "email": "redfinger@konec.vn",
+  "address": "Hà Nội, Việt Nam",
+  "platforms": {
+    "webEmulator": "https://cloudemulator.vn hoặc https://cloudemulator.net (chỉ hỗ trợ đăng nhập email/pass)",
+    "webH5": "https://h5.cloudemulator.vn",
+    "android": "Cài ứng dụng Redfinger Cloud Phone qua file APK hoặc Google Play",
+    "ios": "Truy cập qua Safari WebH5 hoặc hướng dẫn cài đặt trên iOS"
+  },
+  "serviceOverview": "Redfinger Cloud Phone là dịch vụ cho thuê điện thoại Android ảo trên nền tảng đám mây, chạy 24/7 không tắt máy, không tốn pin điện thoại thật, không lo nóng máy, tiết kiệm 4G/Wifi. Rất phù hợp để treo game online, cày cuốc MMO, chơi Roblox, chạy tool/ứng dụng tự động, quản lý đa tài khoản Facebook, TikTok, YouTube...",
+  "products": {
+    "VIP": {
+      "name": "Redfinger VIP",
+      "specs": "Chip CPU 3 Cores, RAM 4GB, ROM 32GB (các bản V8.1, V10, V12, V15). IP: Singapore, Đài Loan, Mỹ...",
+      "pricing": {
+        "1_day": "9.900đ",
+        "7_days": "34.000đ",
+        "30_days": "101.000đ",
+        "90_days": "290.000đ"
+      },
+      "usage": "Phù hợp treo game nhẹ, lướt app, nuôi tài khoản mạng xã hội 24/7."
+    },
+    "KVIP": {
+      "name": "Redfinger KVIP",
+      "specs": "Chip CPU 4 Cores, RAM 6GB, ROM 80GB (các bản K10, K12, K15).",
+      "pricing": {
+        "7_days": "68.000đ",
+        "30_days": "195.000đ",
+        "90_days": "565.000đ"
+      },
+      "usage": "Cấu hình tầm trung mượt mà, chơi game 3D vừa, treo đa tác vụ ổn định."
+    },
+    "SVIP": {
+      "name": "Redfinger SVIP",
+      "specs": "Chip CPU 5 Cores, RAM 8GB, ROM 128GB (các bản S8.1, S10, S12, S15).",
+      "pricing": {
+        "7_days": "98.000đ",
+        "30_days": "285.000đ",
+        "90_days": "820.000đ"
+      },
+      "usage": "Cấu hình cao, treo game nặng đồ họa cao, mượt mà, dung lượng lưu trữ lớn."
+    },
+    "XVIP": {
+      "name": "Redfinger XVIP",
+      "specs": "Cấu hình siêu cấp (CPU khủng, RAM lớn, ROM khủng, Android 10/12).",
+      "usage": "Dành cho nhu cầu hardcore cày game cấu hình nặng nhất, treo lâu dài mượt tuyệt đối."
+    },
+    "ExitLag": {
+      "name": "ExitLag Premium Chính hãng",
+      "usage": "Phần mềm bản quyền giảm ping, chống giật lag khi chơi game server quốc tế."
+    }
+  },
+  "rechargeRules": {
+    "minimumAmount": "50.000 VNĐ",
+    "banking": "Chỉ chuyển khoản qua TÀI KHOẢN NGÂN HÀNG (quét mã VietQR hoặc chuyển đúng STK + đúng cú pháp hiển thị trên website redfinger.vn).",
+    "importantWarning": "TUYỆT ĐỐI KHÔNG chuyển khoản qua QR Shop bằng ví MoMo hoặc ZaloPay. Nếu nạp qua MoMo/ZaloPay hệ thống sẽ KHÔNG ghi nhận và KHÔNG được hỗ trợ tra soát!",
+    "cardRecharge": "Hỗ trợ thẻ cào điện thoại (Viettel, Vinaphone, Mobifone...), cần chọn đúng nhà mạng và mệnh giá."
+  },
+  "cashbackPolicy": {
+    "effectiveDate": "Áp dụng từ tháng 11/2025",
+    "cycle": "Từ ngày 01 đến hết ngày cuối cùng của mỗi tháng",
+    "tiers": [
+      { "threshold": "Từ 500.000 VNĐ", "rate": "2.5%" },
+      { "threshold": "Từ 2.000.000 VNĐ", "rate": "5.0%" },
+      { "threshold": "Từ 5.000.000 VNĐ", "rate": "7.5%" },
+      { "threshold": "Từ 50.000.000 VNĐ", "rate": "10.0%" }
+    ],
+    "payout": "Tiền Cashback được cộng trực tiếp vào số dư tài khoản của khách trên website redfinger.vn vào cuối chu kỳ."
+  },
+  "codeWarrantyAndSupport": {
+    "codeNature": "Mỗi mã Redeem Code là duy nhất và chỉ kích hoạt 1 lần. Mã chưa dùng có hạn lưu giữ lên đến 01 năm.",
+    "accountDifference": "Tài khoản trên web redfinger.vn là tài khoản nạp tiền mua mã. Còn tài khoản trên app Redfinger/cloudemulator.vn là tài khoản để điều khiển và sử dụng điện thoại đám mây.",
+    "outOfStockError": "Lỗi 'Điện thoại đám mây đã hết hàng' khi nhập mã: Đây KHÔNG phải lỗi của mã và không phải lỗi web. Do hệ thống máy chủ Redfinger toàn cầu tại thời điểm đó đang kín máy trống. Khách vui lòng chờ 3-5 phút nhập lại, hoặc chọn server khác còn trống rồi dùng tính năng Replace (Đổi máy chủ) sau, hoặc nhập vào khung giờ vắng (trưa, đêm, cuối chiều). Trường hợp này không thuộc diện hoàn tiền.",
+    "alreadyUsedError": "Nếu mã báo đã sử dụng, hệ thống sẽ kiểm tra log. Nếu mã được kích hoạt sau thời điểm bán, khách cần kiểm tra lại các tài khoản đã đăng nhập/nhập mã. Không hỗ trợ đổi nếu mã đã kích hoạt thành công trên tài khoản khác.",
+    "vendorError": "Nếu kiểm tra xác định mã lỗi do hệ thống/nhà cung cấp hoặc hết hạn trước thời điểm mua, shop hỗ trợ đổi 1 mã mới tương đương 100%."
+  },
+  "howToRedeem": [
+    "Bước 1: Truy cập web cloudemulator.vn (đăng nhập email/pass) hoặc mở ứng dụng Redfinger trên điện thoại Android/iOS.",
+    "Bước 2: Tìm và chọn mục 'Mã quà tặng' (Redeem Code) / 'Sử dụng mã quà tặng trả trước'.",
+    "Bước 3: Chọn 'Thêm điện thoại đám mây' (nếu tạo máy mới) HOẶC chọn 'Gia hạn điện thoại đám mây' (chọn máy đang dùng cần cộng thêm ngày).",
+    "Bước 4: Nhập chính xác mã quà tặng 12 ký tự đã mua từ redfinger.vn và bấm Xác nhận để nhận máy ngay lập tức."
+  ]
+}

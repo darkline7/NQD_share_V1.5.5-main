@@ -58,6 +58,7 @@ import { sendReactionWaitingCountdown } from "./manager-command/check-countdown.
 import { getPermissionCommandName, handleSetCommandActive } from "./manager-command/set-command.js";
 import { scanGroupsWithAction } from "./bot-manager/scan-group.js";
 import { handleDeleteMessage } from "./bot-manager/recent-message.js";
+import { getMixuKeyConfig } from "../service-dqt/chat-bot/mixu-key-service.js";
 import { handleSpeedTestCommand } from "../service-dqt/utilities/speedtest.js";
 import { handleAiCommand } from "../service-dqt/utilities/ai-command.js";
 import { executeWithCircuitBreaker } from "../utils/circuit-breaker.js";
@@ -392,6 +393,11 @@ export async function handleCommandPrivate(api, message) {
           case "ai":
             await handleAiCommand(api, message, aliasCommand);
             return 0;
+          case "key": {
+            const config = getMixuKeyConfig();
+            await api.sendMessage({ msg: config.messageTemplate, quote: message }, threadId, message.type);
+            return 0;
+          }
           case "sticker":
             await handleStickerCommand(api, message);
             return 0;
@@ -536,7 +542,7 @@ export async function handleCommand(
     const commandInfo = getCommand(command, commandConfig);
     const activeCommand = commandInfo ? commandInfo.active : true;
     if (!isAdminLevelHighest && (aliasCommand != "" && !activeCommand)) {
-      return numHandleCommand;
+      return 2;
     }
     numHandleCommand = commandInfo?.type || 99;
     command = commandInfo?.name || command;
@@ -763,6 +769,12 @@ export async function handleCommand(
               case "ai":
                 await handleAiCommand(api, message, aliasCommand);
                 break;
+
+              case "key": {
+                const config = getMixuKeyConfig();
+                await api.sendMessage({ msg: config.messageTemplate, quote: message }, threadId, message.type);
+                break;
+              }
 
               case "sticker":
                 await handleStickerCommand(api, message);

@@ -11,11 +11,17 @@ function getConfigFromEnv() {
     model: process.env.GROQ_AI_MODEL || DEFAULT_MODEL,
     systemPrompt:
       process.env.GROQ_AI_SYSTEM_PROMPT ||
-      "Bạn là bot Zalo tiếng Việt trong nhóm chat. Trả lời tự nhiên, ngắn gọn, vui vừa phải, không spam, không bịa thông tin.",
+      "Bạn là Trợ lý AI Chăm sóc Khách hàng chính thức của website redfinger.vn và nhóm Cộng đồng Redfinger Việt Nam. Bạn hỗ trợ tư vấn dịch vụ thuê Cloud Phone Android treo game 24/7 và giải đáp thắc mắc của khách hàng với thái độ lịch sự, chuyên nghiệp, tận tâm.",
     temperature: Number(process.env.GROQ_AI_TEMPERATURE || 0.7),
-    maxTokens: Number(process.env.GROQ_AI_MAX_TOKENS || 256),
+    maxTokens: Number(process.env.GROQ_AI_MAX_TOKENS || 800),
     cooldownMs: Number(process.env.GROQ_AI_COOLDOWN_MS || 15000),
     replyMode: process.env.GROQ_AI_REPLY_MODE || "all",
+    allowedGroups: process.env.GROQ_AI_ALLOWED_GROUPS
+      ? process.env.GROQ_AI_ALLOWED_GROUPS.split(",").map((s) => s.trim())
+      : ["Cộng đồng Redfinger Việt Nam"],
+    allowedThreads: process.env.GROQ_AI_ALLOWED_THREADS
+      ? process.env.GROQ_AI_ALLOWED_THREADS.split(",").map((s) => s.trim())
+      : [],
   };
 }
 
@@ -26,11 +32,15 @@ function normalizeConfig(config = {}) {
     model: config.model || DEFAULT_MODEL,
     systemPrompt:
       config.systemPrompt ||
-      "Bạn là bot Zalo tiếng Việt trong nhóm chat. Trả lời tự nhiên, ngắn gọn, vui vừa phải, không spam, không bịa thông tin.",
+      "Bạn là Trợ lý AI Chăm sóc Khách hàng chính thức của website redfinger.vn và nhóm Cộng đồng Redfinger Việt Nam. Bạn hỗ trợ tư vấn dịch vụ thuê Cloud Phone Android treo game 24/7 và giải đáp thắc mắc của khách hàng với thái độ lịch sự, chuyên nghiệp, tận tâm.",
     temperature: Number.isFinite(Number(config.temperature)) ? Number(config.temperature) : 0.7,
-    maxTokens: Number.isFinite(Number(config.maxTokens)) ? Number(config.maxTokens) : 256,
+    maxTokens: Number.isFinite(Number(config.maxTokens)) ? Number(config.maxTokens) : 800,
     cooldownMs: Number.isFinite(Number(config.cooldownMs)) ? Number(config.cooldownMs) : 15000,
     replyMode: ["all", "mention"].includes(config.replyMode) ? config.replyMode : "all",
+    allowedGroups: Array.isArray(config.allowedGroups)
+      ? config.allowedGroups
+      : ["Cộng đồng Redfinger Việt Nam"],
+    allowedThreads: Array.isArray(config.allowedThreads) ? config.allowedThreads : [],
   };
 }
 
@@ -50,7 +60,44 @@ export function getGroqAiConfig() {
     maxTokens: fileConfig.maxTokens ?? envConfig.maxTokens,
     cooldownMs: fileConfig.cooldownMs ?? envConfig.cooldownMs,
     replyMode: fileConfig.replyMode || envConfig.replyMode,
+    allowedGroups: fileConfig.allowedGroups || envConfig.allowedGroups,
+    allowedThreads: fileConfig.allowedThreads || envConfig.allowedThreads,
   };
+}
+
+export function isRedfingerSupportGroup(threadId, nameGroup) {
+  const config = getGroqAiConfig();
+  const threadStr = String(threadId || "");
+  const groupNameLower = String(nameGroup || "").toLowerCase().trim();
+
+  // Kiểm tra nếu threadId nằm trong danh sách được chỉ định
+  if (Array.isArray(config.allowedThreads) && config.allowedThreads.length > 0) {
+    if (config.allowedThreads.map(String).includes(threadStr)) {
+      return true;
+    }
+  }
+
+  // Kiểm tra tên nhóm hoặc threadId trong allowedGroups
+  if (Array.isArray(config.allowedGroups) && config.allowedGroups.length > 0) {
+    for (const item of config.allowedGroups) {
+      const itemStr = String(item).toLowerCase().trim();
+      if (!itemStr) continue;
+      if (
+        itemStr === threadStr ||
+        groupNameLower.includes(itemStr) ||
+        itemStr.includes(groupNameLower)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  // Mặc định khớp nếu tên nhóm chứa từ khóa 'redfinger'
+  if (/redfinger/i.test(groupNameLower)) {
+    return true;
+  }
+
+  return false;
 }
 
 export function ensureGroqAiConfigDefaults() {

@@ -5,7 +5,8 @@ import { sendMessageComplete, sendMessageState, sendMessageStateQuote, sendMessa
 import { getGlobalPrefix } from "../../service.js";
 import natural from "natural";
 import { removeMention } from "../../../utils/format-util.js";
-import { callGroqAi, getGroqAiStatus } from "../../../utils/groq-ai.js";
+import { callGroqAi, getGroqAiStatus, isRedfingerSupportGroup } from "../../../utils/groq-ai.js";
+import { handleMixuKeyAutoResponse } from "../mixu-key-service.js";
 
 const dataTrainingPath = path.resolve(process.cwd(), "assets", "json-data", "data-training.json");
 const aiCooldownByThread = new Map();
@@ -25,7 +26,7 @@ function shouldUseGroqAi(content) {
   const status = getGroqAiStatus();
   if (!status.ready) return false;
   if (status.replyMode === "mention") {
-    return /\b(bot|thanh binh|thanh bình)\b/i.test(content);
+    return /\b(bot|redfinger|rf|cskh|support|ad|admin)\b/i.test(content);
   }
   return true;
 }
@@ -50,15 +51,60 @@ function rememberAiTurn(threadId, userContent, assistantContent) {
   aiHistoryByThread.set(threadId, history.slice(-10));
 }
 
-async function findGroqResponse(content, threadId, senderName, nameGroup) {
-  if (!shouldUseGroqAi(content) || !canUseGroqAi(threadId)) return null;
+function isRedfingerRelevantMessage(content, message) {
+  if (typeof content !== "string") return false;
+  const trimmed = content.trim();
+  if (trimmed.length < 2) return false;
+
+  // 1. Phản hồi tiếp khi thành viên bấm reply / quote tin nhắn
+  if (message?.data?.quote) {
+    return true;
+  }
+
+  const clean = trimmed.toLowerCase();
+
+  // 2. Nhắc đến bot, admin, cskh, support
+  if (/\b(bot|redfinger|rf|cskh|support|ad|admin|tro ly|trợ lý)\b/i.test(clean)) {
+    return true;
+  }
+
+  // 3. Chứa các từ khóa dịch vụ Redfinger / Cloud Phone / Mã code / Thanh toán
+  const serviceKeywords = [
+    "mã", "code", "redeem", "key", "cloud", "phone", "đám mây", "dam may",
+    "vip", "kvip", "svip", "xvip", "hết hàng", "het hang",
+    "nạp", "nap", "tiền", "tien", "giá", "gia", "thuê", "thue", "mua", "bán", "ban",
+    "treo", "game", "roblox", "võ lâm", "vo lam", "server", "máy chủ", "may chu",
+    "đổi server", "doi server", "replace", "gia hạn", "gia han", "thêm mới", "them moi",
+    "tài khoản", "tai khoan", "đăng nhập", "dang nhap", "app", "momo", "ngân hàng", "ngan hang"
+  ];
+  if (serviceKeywords.some((kw) => clean.includes(kw))) {
+    return true;
+  }
+
+  // 4. Chứa các từ để hỏi hoặc câu hỏi tư vấn
+  const questionKeywords = [
+    "?", "sao", "làm sao", "lam sao", "thế nào", "the nao", "như nào", "nhu nao",
+    "bao nhiêu", "bao nhieu", "bn", "ở đâu", "o dau", "được không", "duoc khong",
+    "đc ko", "dc ko", "ko đc", "không được", "hướng dẫn", "huong dan", "chỉ em",
+    "chi em", "chỉ mình", "chi minh", "giúp", "giup", "hỗ trợ", "ho tro", "lỗi", "loi"
+  ];
+  if (questionKeywords.some((kw) => clean.includes(kw))) {
+    return true;
+  }
+
+  return false;
+}
+
+async function findGroqResponse(content, threadId, senderName, nameGroup, isRedfinger = false) {
+  if (!isRedfinger && !shouldUseGroqAi(content)) return null;
+  if (!canUseGroqAi(threadId)) return null;
 
   try {
     const prompt = [
       `Nhóm: ${nameGroup || threadId}`,
       `Người gửi: ${senderName}`,
       `Tin nhắn: ${content}`,
-      "Hãy trả lời ngắn gọn, thân thiện, đúng ngữ cảnh nhóm Zalo. Không tự nhận là ChatGPT.",
+      "Hãy trả lời ngắn gọn, thân thiện, lịch sự, đúng nghiệp vụ chăm sóc khách hàng của redfinger.vn. Không tự nhận là ChatGPT hay Claude hay Groq.",
     ].join("\n");
 
     const answer = await callGroqAi(prompt, {
@@ -75,16 +121,30 @@ async function findGroqResponse(content, threadId, senderName, nameGroup) {
 export async function handleChatBot(api, message, threadId, groupSettings, nameGroup, isHandleCommand) {
   if (isHandleCommand) return;
   let content = message.data.content;
+  if (typeof content !== "string") return;
+
+  // 1. Tự động phản hồi thông tin Key trong nhóm "Mixu Dưa Hấu PTG" khi có người nhắn "key"
+  const handledMixu = await handleMixuKeyAutoResponse(api, message, threadId, nameGroup);
+  if (handledMixu) return;
+
   let response = null;
   const senderName = message.data.dName;
 
-  if (
-    groupSettings[threadId].replyEnabled &&
-    isRegularChatMessage(content)
-  ) {
-    response = findResponse(content, threadId);
-    if (!response && groupSettings[threadId].aiEnabled) {
-      response = await findGroqResponse(content, threadId, senderName, nameGroup);
+  const isRedfinger = isRedfingerSupportGroup(threadId, nameGroup);
+
+  if (isRegularChatMessage(content)) {
+    if (isRedfinger) {
+      // Trong nhóm Cộng đồng Redfinger Việt Nam:
+      // KHÔNG CẦN TAG BOT! Tự động trả lời khi nhận diện câu hỏi hoặc nhắc đến dịch vụ
+      if (isRedfingerRelevantMessage(content, message)) {
+        response = await findGroqResponse(content, threadId, senderName, nameGroup, true);
+      }
+    } else if (groupSettings[threadId]?.replyEnabled) {
+      // Các nhóm khác ngoài Redfinger
+      response = findResponse(content, threadId);
+      if (!response && groupSettings[threadId]?.aiEnabled) {
+        response = await findGroqResponse(content, threadId, senderName, nameGroup, false);
+      }
     }
   }
 
@@ -96,7 +156,7 @@ export async function handleChatBot(api, message, threadId, groupSettings, nameG
       message.type
     );
   } else {
-    if (groupSettings[threadId].learnEnabled) {
+    if (groupSettings[threadId]?.learnEnabled) {
       if (message.data.quote) {
         const nameQuote = message.data.quote.fromD;
         const botResponse = message.data.quote.msg;

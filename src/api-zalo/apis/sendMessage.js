@@ -169,7 +169,7 @@ export function sendMessageFactory(api) {
     const quoteData = quote === null || quote === void 0 ? void 0 : quote.data;
     if (quoteData) {
       if (typeof quoteData.content != "string" && quoteData.msgType == "webchat") {
-        throw new ZaloApiError("This kind of `webchat` quote type is not available");
+        quoteData.content = typeof quoteData.content?.title === "string" ? quoteData.content.title : String(quoteData.content || "");
       }
       if (quoteData.msgType == "group.poll") {
         throw new ZaloApiError("The `group.poll` quote type is not available");

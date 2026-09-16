@@ -24,6 +24,17 @@
       "active": true
     },
     {
+      "name": "key",
+      "description": "Xem thông tin update key, link tải và bảng giá Mixu",
+      "syntax": "{p}key",
+      "permission": "all",
+      "countdown": 5,
+      "icon": "🍉",
+      "type": 1,
+      "author": "Thanh Bình",
+      "active": true
+    },
+    {
       "name": "info",
       "description": "Xem thông tin chi tiết tài khoản Zalo của bạn hoặc người được tag",
       "syntax": "{p}info || {p}info [@người_tag]",
@@ -144,7 +155,7 @@
       "icon": "🎮",
       "type": 1,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "diemdanh",
@@ -159,7 +170,7 @@
       "icon": "🎁",
       "type": 1,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "vi",
@@ -176,7 +187,7 @@
       "icon": "💳",
       "type": 1,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "bank",
@@ -191,7 +202,7 @@
       "icon": "💸",
       "type": 1,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "top",
@@ -206,7 +217,7 @@
       "icon": "🏆",
       "type": 1,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "taixiu",
@@ -222,7 +233,7 @@
       "icon": "🎲",
       "type": 1,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "baucua",
@@ -238,7 +249,7 @@
       "icon": "🎋",
       "type": 1,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "keobuabao",
@@ -252,7 +263,7 @@
       "icon": "⚔️",
       "type": 1,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "givemoney",
@@ -266,7 +277,7 @@
       "icon": "👑",
       "type": 2,
       "author": "DQT",
-      "active": true
+      "active": false
     },
     {
       "name": "manager",

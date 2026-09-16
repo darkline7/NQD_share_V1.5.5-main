@@ -239,6 +239,7 @@ function findSimilarCommands(command, availableCommands, threshold = 0.6) {
   };
 
   for (const cmd of availableCommands) {
+    if (cmd.active === false) continue;
     const cmdNameLower = cmd.name.toLowerCase();
 
     // Kiểm tra các trường hợp:
@@ -299,7 +300,7 @@ export async function checkNotFindCommand(api, message, command, availableComman
       {
         success: false,
         message:
-          `Nếu Mày Thắc Mắc Tao Có Những Lệnh Gì, Hãy:\n` +
+          `Nếu bạn cần xem các lệnh hỗ trợ, hãy dùng:\n` +
           `${prefix}help - Xem danh sách lệnh có sẵn`,
       },
       false,
@@ -320,7 +321,7 @@ export async function checkNotFindCommand(api, message, command, availableComman
         success: false,
         message:
           `Không tìm thấy lệnh "${command}"\n` +
-          `Có phải mày muốn dùng:\n` +
+          `Có phải bạn muốn dùng:\n` +
           similarCommands.map((cmd) => `${prefix}${cmd.name} [${getPermissionCommandName(cmd)}]`).join("\n"),
       },
       false,

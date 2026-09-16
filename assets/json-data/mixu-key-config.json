@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "groupKeywords": ["mixu", "dua hau"],
+  "triggerKeywords": ["key", "getkey"],
+  "cooldownSeconds": 10,
+  "links": {
+    "getkey": "https://mrlightvn.fun/app/getkey?ref=nnq1801",
+    "multi": "https://www.mediafire.com/file/szapu3yb9q5tmuo/MixuMulti_16-9[1].apk/file",
+    "module": "https://www.mediafire.com/file/bg3ahcu2fv1j4g5/MixuModule_16-9[1].zip/file"
+  },
+  "pricing": {
+    "3days": "40🍉",
+    "7days": "70🍉",
+    "30days": "200🍉"
+  },
+  "messageTemplate": "🍉 ─── THÔNG BÁO UPDATE KEY MIXU ─── 🍉\n\n📢 Bản Mới: Đã có getkey vượt link (2 link / 12 tiếng)\n⚠️ Lưu ý: Ai đang dùng key cũ vui lòng KHÔNG UPDATE!\n\n🔗 Link Get Key:\n👉 https://mrlightvn.fun/app/getkey?ref=nnq1801\n\n📲 Link Tải Bản Cài Đặt:\n🔹 Multi APK:\nhttps://www.mediafire.com/file/szapu3yb9q5tmuo/MixuMulti_16-9[1].apk/file\n\n🔹 Module ZIP:\nhttps://www.mediafire.com/file/bg3ahcu2fv1j4g5/MixuModule_16-9[1].zip/file\n\n🍉 ─── BẢNG GIÁ KEY ─── 🍉\n  ▪️  3 Ngày  ➜  40 🍉\n  ▪️  7 Ngày  ➜  70 🍉\n  ▪️ 30 Ngày  ➜ 200 🍉\n─────────────────────────────\n💬 Nhắn tin Admin để mua key & kích hoạt ngay!"
+}

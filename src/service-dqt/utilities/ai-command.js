@@ -1,6 +1,7 @@
-import { callGroqAi } from "../../utils/groq-ai.js";
+import { callGroqAi, isRedfingerSupportGroup } from "../../utils/groq-ai.js";
 import { removeMention } from "../../utils/format-util.js";
 import { getGlobalPrefix } from "../service.js";
+import { getGroupInfoData } from "../info-service/group-info.js";
 import {
   appendConversation,
   clearConversation,
@@ -9,20 +10,14 @@ import {
 } from "../../utils/ai-memory.js";
 
 const AI_COMMAND_PROMPT = [
-  "Bạn là một AI nói chuyện kiểu bạn bè cực thân trong bot Zalo của Thanh Bình.",
-  "Mặc định xưng 'tao' và gọi người dùng là 'mày' trong toàn bộ câu trả lời.",
-  "Nói tiếng Việt đời thường như người thật đang nhắn tin: cộc, thẳng, gọn, không giữ hình tượng.",
-  "Được cà khịa, khịa đểu, phản ứng mạnh và dùng vài câu chửi đời thường khi người dùng làm sai hoặc hỏi lộn xộn.",
-  "Không dùng giọng nhân viên tư vấn, chăm sóc khách hàng, giáo viên hay văn mẫu lịch sự giả tạo.",
-  "Đi thẳng vào vấn đề: nếu sai thì nói sai ở đâu, vì sao sai, rồi đưa cách làm đúng.",
-  "Nếu người dùng cãi nhưng sai, phản bác thẳng bằng bằng chứng hoặc lý do rõ ràng.",
-  "Không đồng ý bừa chỉ để chiều người dùng.",
-  "Nếu bạn trả lời sai, nhận ngay: 'Ừ, đoạn này tao nói sai.' hoặc 'Tao tính nhầm mẹ rồi, sửa lại như sau.'",
-  "Bạn có bộ nhớ riêng theo từng người dùng. Dùng lịch sử chat để nhớ cách xưng hô, sở thích, việc đang làm và ngữ cảnh trước đó của người đang hỏi.",
-  "Không trộn thông tin giữa người này với người khác. Nếu không có trong lịch sử của người đó thì nói không biết, đừng bịa.",
-  "Giữ mức mỏ hỗn ở dạng bạn bè thân: không đe dọa, không kỳ thị, không xúc phạm nhóm yếu thế, không kích động gây hại.",
-  "Nếu câu hỏi thiếu dữ kiện, hỏi lại đúng phần cần bổ sung, đừng đoán mò.",
-  "Nếu liên quan pháp lý, y tế, tài chính nghiêm trọng, nói thẳng đây không phải chỗ phán chắc và nhắc người dùng kiểm chứng với chuyên gia.",
+  "Bạn là Trợ lý AI Chăm sóc Khách hàng chính thức của website redfinger.vn và nhóm Cộng đồng Redfinger Việt Nam.",
+  "Nhiệm vụ của bạn là tư vấn, giải đáp thắc mắc và hỗ trợ khách hàng về dịch vụ thuê điện thoại đám mây (Android Cloud Phone) treo game 24/7 và mã quà tặng (Redfinger Redeem Code).",
+  "Luôn giữ phong cách lịch sự, thân thiện, nhiệt tình và chuyên nghiệp. Xưng 'Em' (hoặc 'Redfinger Support') và gọi khách hàng là 'Bạn', 'Anh/Chị' hoặc 'Quý khách'. Tuyệt đối không xưng tao-mày, không cộc cằn hay thô lỗ.",
+  "Trả lời ngắn gọn, chính xác, bám sát các chính sách và thông tin chính hãng trên website redfinger.vn.",
+  "Nhắc nhở khách hàng bảo mật mã thẻ 12 ký tự, không gửi mã lên nhóm công khai.",
+  "Nếu khách hàng hỏi về nạp tiền: Nhấn mạnh tối thiểu 50.000 VNĐ, CHỈ chuyển khoản NGÂN HÀNG, TUYỆT ĐỐI KHÔNG dùng MoMo/ZaloPay quét mã QR Shop.",
+  "Nếu khách hàng gặp lỗi 'Điện thoại đám mây đã hết hàng': Giải thích đây là do máy chủ toàn cầu tạm thời hết máy trống, không phải lỗi mã hay lỗi web. Hướng dẫn kiên nhẫn chờ 3-5 phút thử lại hoặc chọn server khác còn máy rồi dùng tính năng Replace (Đổi máy chủ) sau.",
+  "Nếu khách hỏi về cách sử dụng: Hướng dẫn vào app Redfinger hoặc web cloudemulator.vn, vào mục Mã quà tặng trả trước -> Thêm mới hoặc Gia hạn -> Nhập mã 12 ký tự."
 ].join(" ");
 
 function getQuoteText(message) {
@@ -62,6 +57,29 @@ function splitMessage(text, maxLength = 1800) {
 }
 
 export async function handleAiCommand(api, message, aliasCommand) {
+  if (message.type === 1) {
+    let groupName = "";
+    try {
+      const groupInfo = await getGroupInfoData(api, message.threadId);
+      groupName = groupInfo?.name || "";
+    } catch (e) {
+      groupName = "";
+    }
+
+    if (!isRedfingerSupportGroup(message.threadId, groupName)) {
+      await api.sendMessage(
+        {
+          msg: "Dạ, Trợ lý AI Chăm sóc Khách hàng Redfinger chỉ hỗ trợ trong nhóm 'Cộng đồng Redfinger Việt Nam' thôi ạ! Quý khách vui lòng đặt câu hỏi tại nhóm cộng đồng để được hỗ trợ nhé. 🙏",
+          quote: message,
+          ttl: 30000,
+        },
+        message.threadId,
+        message.type
+      );
+      return;
+    }
+  }
+
   const prefix = getGlobalPrefix();
   const content = removeMention(message);
   const question = content.replace(`${prefix}${aliasCommand}`, "").trim();
@@ -73,7 +91,7 @@ export async function handleAiCommand(api, message, aliasCommand) {
     clearConversation(memoryKey);
     await api.sendMessage(
       {
-        msg: "Xóa trí nhớ riêng của mày rồi. Giờ hỏi lại từ đầu, đỡ lẫn mấy chuyện cũ.",
+        msg: "Dạ, em đã xóa lịch sử hội thoại trước đó rồi ạ. Quý khách có thể hỏi lại câu hỏi mới nhé!",
         quote: message,
         ttl: 60000,
       },
@@ -87,7 +105,7 @@ export async function handleAiCommand(api, message, aliasCommand) {
     const historyCount = getConversationHistory(memoryKey).length;
     await api.sendMessage(
       {
-        msg: `Tao đang nhớ ${historyCount} mẩu hội thoại gần nhất của riêng mày. Muốn xóa thì dùng ${prefix}${aliasCommand} reset.`,
+        msg: `Em đang lưu nhớ ${historyCount} lượt hội thoại gần nhất của bạn. Nếu muốn làm mới cuộc trò chuyện, bạn gõ ${prefix}${aliasCommand} reset nhé!`,
         quote: message,
         ttl: 60000,
       },
@@ -101,9 +119,9 @@ export async function handleAiCommand(api, message, aliasCommand) {
     await api.sendMessage(
       {
         msg:
-          `Nhập nội dung cần hỏi AI.\n` +
-          `Ví dụ: ${prefix}${aliasCommand} tóm tắt giúp tôi cách tạo sticker\n` +
-          `Hoặc reply một tin nhắn rồi dùng ${prefix}${aliasCommand} tóm tắt`,
+          `Quý khách vui lòng nhập nội dung cần Redfinger hỗ trợ.\n` +
+          `Ví dụ: ${prefix}${aliasCommand} giá thuê VIP 1 tháng bao nhiêu?\n` +
+          `Hoặc: ${prefix}${aliasCommand} cách khắc phục lỗi hết hàng khi nhập code`,
         quote: message,
         ttl: 60000,
       },
@@ -127,7 +145,7 @@ export async function handleAiCommand(api, message, aliasCommand) {
       systemPrompt: AI_COMMAND_PROMPT,
       history,
       requireEnabled: false,
-      temperature: 0.9,
+      temperature: 0.7,
       maxTokens: 700,
       timeout: 60000,
     });
