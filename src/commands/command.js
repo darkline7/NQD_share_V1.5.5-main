@@ -58,7 +58,6 @@ import { sendReactionWaitingCountdown } from "./manager-command/check-countdown.
 import { getPermissionCommandName, handleSetCommandActive } from "./manager-command/set-command.js";
 import { scanGroupsWithAction } from "./bot-manager/scan-group.js";
 import { handleDeleteMessage } from "./bot-manager/recent-message.js";
-import { getMixuKeyConfig } from "../service-dqt/chat-bot/mixu-key-service.js";
 import { handleSpeedTestCommand } from "../service-dqt/utilities/speedtest.js";
 import { executeWithCircuitBreaker } from "../utils/circuit-breaker.js";
 import {
@@ -79,6 +78,7 @@ const HARD_DISABLED_COMMANDS = new Set([
   "tagall",
   "sendp",
   "ai",
+  "key",
 ]);
 
 async function executeExternalCrawlCommand(api, message, serviceName, handler) {
@@ -391,11 +391,6 @@ export async function handleCommandPrivate(api, message) {
           case "help":
             await helpCommand(api, message);
             return 0;
-          case "key": {
-            const config = getMixuKeyConfig();
-            await api.sendMessage({ msg: config.messageTemplate, quote: message }, threadId, message.type);
-            return 0;
-          }
           case "sticker":
             await handleStickerCommand(api, message);
             return 0;
@@ -499,8 +494,8 @@ export async function handleCommand(
   if (!isBotActiveInGroup) {
     // Khi bot đang TẮT tương tác thành viên trong nhóm (/bot off):
     // 1. Thành viên thường hoàn toàn không tương tác được bất kỳ lệnh nào (im lặng bỏ qua)
-    // Ngoại lệ: Lệnh /key và /bot vẫn hoạt động để cung cấp thông tin cập nhật
-    if (!isAnyAdmin && command !== "key" && command !== "bot") {
+    // Ngoại lệ: Lệnh /bot vẫn hoạt động để cung cấp thông tin cập nhật và trạng thái
+    if (!isAnyAdmin && command !== "bot") {
       return numHandleCommand;
     }
 
@@ -508,7 +503,7 @@ export async function handleCommand(
     // Vẫn cho phép sử dụng tất cả các lệnh quản lý, cài đặt nhóm và lệnh anti (/setting, /antisdt, /antilink, /bot, /mute, v.v.)
     // Bỏ qua các lệnh tương tác giải trí của thành viên thường (permission: 'all', type: 1)
     const cmdCheck = getCommand(command, getCommandConfig().commands);
-    const isMemberOnlyCmd = cmdCheck && cmdCheck.permission === "all" && cmdCheck.type === 1 && command !== "bot" && command !== "detail" && command !== "key";
+    const isMemberOnlyCmd = cmdCheck && cmdCheck.permission === "all" && cmdCheck.type === 1 && command !== "bot" && command !== "detail";
     if (isMemberOnlyCmd) {
       return numHandleCommand;
     }
@@ -760,12 +755,6 @@ export async function handleCommand(
               case "help":
                 await helpCommand(api, message, groupAdmins);
                 break;
-
-              case "key": {
-                const config = getMixuKeyConfig();
-                await api.sendMessage({ msg: config.messageTemplate, quote: message }, threadId, message.type);
-                break;
-              }
 
               case "sticker":
                 await handleStickerCommand(api, message);

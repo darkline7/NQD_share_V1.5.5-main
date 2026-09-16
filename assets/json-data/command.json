@@ -24,17 +24,6 @@
       "active": false
     },
     {
-      "name": "key",
-      "description": "Xem thông tin update key, link tải và bảng giá Mixu",
-      "syntax": "{p}key",
-      "permission": "all",
-      "countdown": 5,
-      "icon": "🍉",
-      "type": 1,
-      "author": "Thanh Bình",
-      "active": true
-    },
-    {
       "name": "info",
       "description": "Xem thông tin chi tiết tài khoản Zalo của bạn hoặc người được tag",
       "syntax": "{p}info || {p}info [@người_tag]",
