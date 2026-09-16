@@ -470,10 +470,9 @@ export async function handleCommand(
 
   const trimmedContent = content.trim();
   const lowerContent = trimmedContent.toLowerCase();
-  const isNoPrefixBot = lowerContent === "bot" || lowerContent.startsWith("bot ");
   const isDotPrefixBot = lowerContent === ".bot" || lowerContent.startsWith(".bot ");
 
-  if (!content.startsWith(prefix) && !isNoPrefixBot && !isDotPrefixBot) {
+  if (!content.startsWith(prefix) && !isDotPrefixBot) {
     return numHandleCommand;
   }
 
@@ -482,9 +481,6 @@ export async function handleCommand(
 
   if (isDotPrefixBot && !content.startsWith(prefix)) {
     commandParts = trimmedContent.slice(1).trim().split(/\s+/);
-    command = "bot";
-  } else if (isNoPrefixBot && !content.startsWith(prefix)) {
-    commandParts = trimmedContent.split(/\s+/);
     command = "bot";
   } else if (checkSpecialCommand(content, prefix)) {
     commandParts = content.split("_");

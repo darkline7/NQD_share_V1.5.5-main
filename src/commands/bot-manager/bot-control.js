@@ -26,9 +26,6 @@ export function isBotControlCommand(content, prefix) {
   if (trimmed === "!bot" || trimmed.startsWith("!bot ")) {
     return true;
   }
-  if (trimmed === "bot" || trimmed.startsWith("bot ")) {
-    return true;
-  }
   return false;
 }
 
