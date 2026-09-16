@@ -14,14 +14,14 @@
     },
     {
       "name": "ai",
-      "description": "Hỏi AI bằng Groq",
-      "syntax": "{p}ai [câu hỏi]",
+      "description": "Chức năng AI (Đã gỡ bỏ)",
+      "syntax": "{p}ai",
       "permission": "all",
       "countdown": 10,
       "icon": "🤖",
       "type": 1,
       "author": "Thanh Bình",
-      "active": true
+      "active": false
     },
     {
       "name": "key",
@@ -430,12 +430,12 @@
     },
     {
       "name": "bot",
-      "description": "Bật/Tắt tương tác của bot với thành viên (Anti và lệnh Cài đặt vẫn hoạt động)",
+      "description": "Xem trạng thái hoặc Bật/Tắt tương tác của bot trong nhóm",
       "syntax": "{p}bot [on|off|status]",
-      "permission": "adminBox",
-      "countdown": 1,
+      "permission": "all",
+      "countdown": 2,
       "icon": "🤖",
-      "type": 3,
+      "type": 1,
       "author": "Thanh Bình",
       "active": true,
       "alias": [

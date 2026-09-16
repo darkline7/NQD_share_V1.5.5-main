@@ -60,7 +60,6 @@ import { scanGroupsWithAction } from "./bot-manager/scan-group.js";
 import { handleDeleteMessage } from "./bot-manager/recent-message.js";
 import { getMixuKeyConfig } from "../service-dqt/chat-bot/mixu-key-service.js";
 import { handleSpeedTestCommand } from "../service-dqt/utilities/speedtest.js";
-import { handleAiCommand } from "../service-dqt/utilities/ai-command.js";
 import { executeWithCircuitBreaker } from "../utils/circuit-breaker.js";
 import {
   handleDailyCommand,
@@ -79,6 +78,7 @@ const lastCommandUsage = {};
 const HARD_DISABLED_COMMANDS = new Set([
   "tagall",
   "sendp",
+  "ai",
 ]);
 
 async function executeExternalCrawlCommand(api, message, serviceName, handler) {
@@ -361,7 +361,7 @@ export async function handleCommandPrivate(api, message) {
         case "bot":
           await api.sendMessage(
             {
-              msg: "🤖 Lệnh /bot on và /bot off được sử dụng trực tiếp trong nhóm để Bật hoặc Tắt bot hoạt động trong nhóm đó.",
+              msg: "🤖 Bot đang hoạt động!\n\n📌 Lưu ý: Bot chỉ phản hồi khi sử dụng lệnh có prefix (ví dụ: /help, /info, /bot).\nCác tin nhắn thông thường không có prefix sẽ không được phản hồi.",
               quote: message,
             },
             message.threadId,
@@ -390,9 +390,6 @@ export async function handleCommandPrivate(api, message) {
             return 0;
           case "help":
             await helpCommand(api, message);
-            return 0;
-          case "ai":
-            await handleAiCommand(api, message, aliasCommand);
             return 0;
           case "key": {
             const config = getMixuKeyConfig();
@@ -502,8 +499,8 @@ export async function handleCommand(
   if (!isBotActiveInGroup) {
     // Khi bot đang TẮT tương tác thành viên trong nhóm (/bot off):
     // 1. Thành viên thường hoàn toàn không tương tác được bất kỳ lệnh nào (im lặng bỏ qua)
-    // Ngoại lệ: Lệnh /key vẫn hoạt động để cung cấp thông tin cập nhật key
-    if (!isAnyAdmin && command !== "key") {
+    // Ngoại lệ: Lệnh /key và /bot vẫn hoạt động để cung cấp thông tin cập nhật
+    if (!isAnyAdmin && command !== "key" && command !== "bot") {
       return numHandleCommand;
     }
 
@@ -762,10 +759,6 @@ export async function handleCommand(
 
               case "help":
                 await helpCommand(api, message, groupAdmins);
-                break;
-
-              case "ai":
-                await handleAiCommand(api, message, aliasCommand);
                 break;
 
               case "key": {

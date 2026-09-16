@@ -210,60 +210,16 @@ export function ensureGroqAiConfigDefaults() {
 }
 
 export function getGroqAiStatus() {
-  const config = getGroqAiConfig();
   return {
-    enabled: config.enabled,
-    model: config.model,
-    hasApiKey: Boolean(config.apiKey),
-    ready: Boolean(config.enabled && config.apiKey),
-    replyMode: config.replyMode,
-    cooldownMs: config.cooldownMs,
+    enabled: false,
+    model: "",
+    hasApiKey: false,
+    ready: false,
+    replyMode: "off",
+    cooldownMs: 0,
   };
 }
 
 export async function callGroqAi(prompt, options = {}) {
-  const config = getGroqAiConfig();
-  const requireEnabled = options.requireEnabled !== false;
-  if ((requireEnabled && !config.enabled) || !config.apiKey) {
-    throw new Error("Groq AI chưa được cấu hình API key");
-  }
-
-  const messages = [];
-  const systemPrompt = options.systemPrompt ?? config.systemPrompt;
-  if (systemPrompt) {
-    messages.push({ role: "system", content: systemPrompt });
-  }
-
-  if (Array.isArray(options.history)) {
-    for (const item of options.history.slice(-8)) {
-      if (item?.role && item?.content) {
-        messages.push({ role: item.role, content: item.content });
-      }
-    }
-  }
-  messages.push({ role: "user", content: prompt });
-
-  const response = await axios.post(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      model: options.model || config.model,
-      messages,
-      temperature: options.temperature ?? config.temperature,
-      max_tokens: options.maxTokens ?? config.maxTokens,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      timeout: options.timeout || 45000,
-    }
-  );
-
-  const answer = response.data?.choices?.[0]?.message?.content;
-  if (!answer) {
-    throw new Error("Groq AI không trả về nội dung");
-  }
-
-  return String(answer).trim();
+  return null;
 }

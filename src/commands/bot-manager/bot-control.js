@@ -61,25 +61,6 @@ export async function handleBotControlCommand(
     }
   }
 
-  if (isAuthorized === undefined) {
-    const senderId = message.data?.uidFrom;
-    const groupAdmins = await getGroupAdmins(api, threadId);
-    const isAdminBox = Array.isArray(groupAdmins) && groupAdmins.includes(senderId);
-    const botAdmins = readAdmins();
-    const isAdminBot = Array.isArray(botAdmins) && botAdmins.includes(senderId);
-    const isAdminLevelHighest = isAdmin(senderId);
-    isAuthorized = isAdminBox || isAdminBot || isAdminLevelHighest;
-  }
-
-  if (!isAuthorized) {
-    await sendMessageWarning(
-      api,
-      message,
-      "⚠️ Bạn không có đủ quyền để sử dụng lệnh này!\nChỉ Trưởng/Phó nhóm hoặc Quản trị Bot mới có thể Bật/Tắt Bot."
-    );
-    return false;
-  }
-
   if (!groupSettings[threadId]) {
     groupSettings[threadId] = {};
   }
@@ -90,18 +71,42 @@ export async function handleBotControlCommand(
     const statusText = currentStatus ? "🟢 Đang BẬT" : "🔴 Đang TẮT (Chỉ giữ Anti & Cài đặt)";
     const groupTitle = nameGroup || groupSettings[threadId]?.nameGroup || "Nhóm hiện tại";
     const caption =
-      `🤖 TRẠNG THÁI TƯƠNG TÁC BOT TRONG NHÓM\n` +
+      `🤖 TRẠNG THÁI HOẠT ĐỘNG CỦA BOT\n` +
       `• Nhóm: ${groupTitle}\n` +
-      `• Tương tác thành viên: ${statusText}\n` +
-      `• Chức năng bảo vệ Anti: 🟢 Luôn hoạt động\n` +
-      `• Chức năng cài đặt/quản trị: 🟢 Luôn hoạt động\n` +
+      `• Trạng thái tương tác: ${statusText}\n` +
+      `• Tiền tố lệnh (Prefix): ${prefix}\n` +
+      `──────────────────\n` +
+      `📌 Lưu ý: Bot chỉ phản hồi khi sử dụng lệnh có prefix (ví dụ: ${prefix}help, ${prefix}bot, ${prefix}key).\n` +
+      `Các tin nhắn trò chuyện thông thường không có prefix sẽ không được phản hồi.\n` +
       `──────────────────\n` +
       `💡 Hướng dẫn sử dụng:\n` +
-      `• ${prefix}bot on : Bật tương tác thành viên trong nhóm\n` +
-      `• ${prefix}bot off : Tắt tương tác thành viên (chức năng setting & anti vẫn hoạt động)\n` +
+      `• ${prefix}help : Xem danh sách lệnh bot\n` +
+      `• ${prefix}bot on : Bật tương tác bot trong nhóm\n` +
+      `• ${prefix}bot off : Tắt tương tác bot trong nhóm\n` +
       `*(Chỉ Trưởng/Phó nhóm hoặc Quản trị Bot mới có thể Bật/Tắt)*`;
     await sendMessageQuery(api, message, caption);
     return false;
+  }
+
+  if (isAuthorized === undefined) {
+    const senderId = message.data?.uidFrom;
+    const groupAdmins = await getGroupAdmins(api, threadId);
+    const isAdminBox = Array.isArray(groupAdmins) && groupAdmins.includes(senderId);
+    const botAdmins = readAdmins();
+    const isAdminBot = Array.isArray(botAdmins) && botAdmins.includes(senderId);
+    const isAdminLevelHighest = isAdmin(senderId);
+    isAuthorized = isAdminBox || isAdminBot || isAdminLevelHighest;
+  }
+
+  if (action === "on" || action === "off") {
+    if (!isAuthorized) {
+      await sendMessageWarning(
+        api,
+        message,
+        "⚠️ Bạn không có đủ quyền để thực hiện thao tác này!\nChỉ Trưởng/Phó nhóm hoặc Quản trị Bot mới có thể Bật/Tắt Bot."
+      );
+      return false;
+    }
   }
 
   if (action === "on") {
