@@ -55,6 +55,12 @@ export function isMixuDuaHauGroup(threadId, nameGroup) {
   const config = getMixuKeyConfig();
   if (!config.enabled) return false;
 
+  // 1. Kiểm tra theo ID nhóm cấu hình cố định
+  if (threadId && Array.isArray(config.groupIds) && config.groupIds.includes(String(threadId))) {
+    return true;
+  }
+
+  // 2. Kiểm tra theo từ khóa tên nhóm
   const cleanGroup = removeVietnameseAccents(nameGroup || "").toLowerCase();
   const keywords = Array.isArray(config.groupKeywords) && config.groupKeywords.length > 0
     ? config.groupKeywords
@@ -65,11 +71,32 @@ export function isMixuDuaHauGroup(threadId, nameGroup) {
 
 export function isMixuKeyTrigger(content) {
   if (typeof content !== "string") return false;
-  const clean = content.trim().toLowerCase();
+  const clean = content.trim().toLowerCase().replace(/^[./!]+/, "");
   if (!clean) return false;
 
-  // Khớp từ "key", "xin key", "lấy key", "getkey", "get key", v.v.
-  return /\bkey\b/i.test(clean) || /get\s*key/i.test(clean);
+  // 1. Trùng khớp chính xác từ khóa ngắn
+  if (clean === "key" || clean === "getkey" || clean === "get key") {
+    return true;
+  }
+
+  // 2. Không kích hoạt nếu câu quá dài (> 35 ký tự) để tránh tin nhắn trò chuyện thông thường
+  if (clean.length > 35) return false;
+
+  // 3. Các mẫu câu hỏi xin key / lấy key / link key
+  // Ví dụ: "xin key", "lấy key", "cho key", "mua key", "xin link key", "link getkey", "bảng giá key"
+  const requestPattern = /^(xin|lay|lấy|cho|mua|hoi|hỏi|huong dan|hướng dẫn|link|bang gia|bảng giá)\s+.*(key|getkey)/i;
+  if (requestPattern.test(clean)) return true;
+
+  // 4. Các mẫu câu hỏi bắt đầu bằng "key" hoặc "getkey"
+  // Ví dụ: "key ơi", "key ad", "key voi", "key với", "key ntn", "key moi", "key mới", "key update", "key hom nay"
+  const startPattern = /^(key|getkey)\s+(oi|ơi|ad|admin|voi|với|ae|nhe|nhé|ne|nè|ntn|sao|moi|mới|update|hom nay|hôm nay|a|ạ)/i;
+  if (startPattern.test(clean)) return true;
+
+  // 5. Kết thúc bằng key: "co ai co key", "ai co key"
+  const endPattern = /(ai co|ai có|xin)\s+(key|getkey)$/i;
+  if (endPattern.test(clean)) return true;
+
+  return false;
 }
 
 export async function handleMixuKeyAutoResponse(api, message, threadId, nameGroup) {
@@ -115,7 +142,11 @@ export async function handleMixuKeyAutoResponse(api, message, threadId, nameGrou
       }
     } catch (sendErr) {
       // Fallback gửi không quote nếu có lỗi Zalo quote
-      await api.sendMessage(replyMsg, threadId, message.type);
+      try {
+        await api.sendMessage({ msg: replyMsg }, threadId, message.type);
+      } catch (fbErr) {
+        console.error("Lỗi khi gửi fallback key Mixu:", fbErr.message);
+      }
     }
 
     return true;
@@ -124,3 +155,4 @@ export async function handleMixuKeyAutoResponse(api, message, threadId, nameGrou
     return false;
   }
 }
+

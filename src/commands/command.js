@@ -501,7 +501,8 @@ export async function handleCommand(
   if (!isBotActiveInGroup) {
     // Khi bot đang TẮT tương tác thành viên trong nhóm (/bot off):
     // 1. Thành viên thường hoàn toàn không tương tác được bất kỳ lệnh nào (im lặng bỏ qua)
-    if (!isAnyAdmin) {
+    // Ngoại lệ: Lệnh /key vẫn hoạt động để cung cấp thông tin cập nhật key
+    if (!isAnyAdmin && command !== "key") {
       return numHandleCommand;
     }
 
@@ -509,7 +510,7 @@ export async function handleCommand(
     // Vẫn cho phép sử dụng tất cả các lệnh quản lý, cài đặt nhóm và lệnh anti (/setting, /antisdt, /antilink, /bot, /mute, v.v.)
     // Bỏ qua các lệnh tương tác giải trí của thành viên thường (permission: 'all', type: 1)
     const cmdCheck = getCommand(command, getCommandConfig().commands);
-    const isMemberOnlyCmd = cmdCheck && cmdCheck.permission === "all" && cmdCheck.type === 1 && command !== "bot" && command !== "detail";
+    const isMemberOnlyCmd = cmdCheck && cmdCheck.permission === "all" && cmdCheck.type === 1 && command !== "bot" && command !== "detail" && command !== "key";
     if (isMemberOnlyCmd) {
       return numHandleCommand;
     }

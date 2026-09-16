@@ -17,6 +17,7 @@ import { handleAutoReplyPrivate } from "../service-dqt/chat-bot/auto-reply-priva
 import { handleOnChatUser, handleOnReplyFromUser } from "../service-dqt/service.js";
 
 import { handleChatBot } from "../service-dqt/chat-bot/bot-learning/dqt-bot.js";
+import { handleMixuKeyAutoResponse } from "../service-dqt/chat-bot/mixu-key-service.js";
 
 import { getGroupAdmins, getGroupInfoData } from "../service-dqt/info-service/group-info.js";
 
@@ -150,6 +151,18 @@ export async function messagesUser(api, message) {
         isAdminBox,
         handleChat
       );
+
+      // Tự động phản hồi thông tin Key trong nhóm Mixu Dưa Hấu khi có người nhắn "key", "getkey", "xin key", v.v.
+      // Luôn hoạt động độc lập để phục vụ thành viên nhóm Mixu, kể cả khi bot tắt tương tác giải trí chung (/bot off)
+      if (!isSelf && isPlainText && handleChat && numberHandleCommand === -1) {
+        const handledMixu = await handleMixuKeyAutoResponse(
+          api,
+          message,
+          threadId,
+          nameGroup || groupSettings[threadId]?.nameGroup
+        );
+        if (handledMixu) return;
+      }
 
       // Tương tác với thành viên (Chat bot, Game, Phản hồi trò chuyện)
       // Chỉ hoạt động khi bot BẬT tương tác trong nhóm (isBotActiveInGroup !== false)
