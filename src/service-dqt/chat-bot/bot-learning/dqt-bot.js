@@ -5,7 +5,7 @@ import { sendMessageComplete, sendMessageState, sendMessageStateQuote, sendMessa
 import { getGlobalPrefix } from "../../service.js";
 import natural from "natural";
 import { removeMention } from "../../../utils/format-util.js";
-import { callGroqAi, getGroqAiStatus, isRedfingerSupportGroup } from "../../../utils/groq-ai.js";
+import { callGroqAi, getGroqAiStatus, isRedfingerSupportGroup, getEffectiveAiPrompt } from "../../../utils/groq-ai.js";
 import { handleMixuKeyAutoResponse } from "../mixu-key-service.js";
 
 const dataTrainingPath = path.resolve(process.cwd(), "assets", "json-data", "data-training.json");
@@ -104,10 +104,12 @@ async function findGroqResponse(content, threadId, senderName, nameGroup, isRedf
       `Nhóm: ${nameGroup || threadId}`,
       `Người gửi: ${senderName}`,
       `Tin nhắn: ${content}`,
-      "Hãy trả lời ngắn gọn, thân thiện, lịch sự, đúng nghiệp vụ chăm sóc khách hàng của redfinger.vn. Không tự nhận là ChatGPT hay Claude hay Groq.",
     ].join("\n");
 
+    const systemPrompt = getEffectiveAiPrompt(threadId, nameGroup);
+
     const answer = await callGroqAi(prompt, {
+      systemPrompt,
       history: getAiHistory(threadId),
     });
     rememberAiTurn(threadId, `${senderName}: ${content}`, answer);
@@ -610,18 +612,36 @@ export async function handleLearnCommand(api, message, groupSettings) {
     }
     return true;
   } else if (content.startsWith(`${prefix}learn`)) {
+    const rawArg = content.slice(`${prefix}learn`.length).trim();
+    if (rawArg.includes("=>")) {
+      const [q, ...aParts] = rawArg.split("=>");
+      const question = q.trim();
+      const answer = aParts.join("=>").trim();
+      if (question && answer) {
+        const success = await learnNewResponse(api, threadId, question, answer);
+        if (success) {
+          const caption = `Đã thêm câu trả lời mới thành công. Khi người dùng nhắc đến "${question}", bot có thể trả lời: "${answer}"`;
+          await sendMessageComplete(api, message, caption);
+        } else {
+          const caption = `Câu trả lời "${answer}" đã tồn tại cho câu hỏi "${question}"`;
+          await sendMessageWarning(api, message, caption);
+        }
+        return true;
+      }
+    }
+
     const parts = content.split(" ");
     if (parts.length === 1) {
       // Nếu Không có đối số, chuyển trạng thái ngược lại
       groupSettings[threadId].learnEnabled = !groupSettings[threadId].learnEnabled;
-      const caption = `Chế đ học tập đã được ${groupSettings[threadId].learnEnabled ? "bật" : "tắt"}!`;
+      const caption = `Chế độ học tập đã được ${groupSettings[threadId].learnEnabled ? "bật" : "tắt"}!`;
       await sendMessageStateQuote(api, message, caption, groupSettings[threadId].learnEnabled, 30000, false);
     } else if (parts[1] === "on" || parts[1] === "off") {
       groupSettings[threadId].learnEnabled = parts[1] === "on";
       const caption = `Chế độ học tập đã được ${parts[1] === "on" ? "bật" : "tắt"}!`;
       await sendMessageStateQuote(api, message, caption, groupSettings[threadId].learnEnabled, 30000, false);
     } else {
-      await sendMessageWarning(api, message, "❌ Cú pháp Không hợp lệ. Sử dụng !learn, !learn on/off để bật tắt chế độ học tập");
+      await sendMessageWarning(api, message, "❌ Cú pháp Không hợp lệ. Sử dụng !learn on/off để bật tắt hoặc !learn [câu hỏi] => [câu trả lời] để dạy bot");
     }
     return true;
   } else if (content.startsWith(`${prefix}unlearn`)) {

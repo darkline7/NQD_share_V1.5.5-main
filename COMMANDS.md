@@ -331,7 +331,7 @@ pm2 restart zlbot
 | Tên lệnh | Bí danh (Alias) | Cú pháp | Thời gian chờ (CD) | Mô tả chi tiết |
 | :--- | :--- | :--- | :---: | :--- |
 | **help** | Không | `{p}help` | 5s | Hiển thị bảng danh sách lệnh thành viên dưới dạng ảnh Canvas. |
-| **ai** | Không | `{p}ai [câu hỏi]` | 10s | Hỏi đáp thông minh với trí tuệ nhân tạo Groq / Cloudflare AI. |
+| **ai** | Không | `{p}ai [câu hỏi]`<br>`{p}ai prompt [xem/nội dung/reset]`<br>`{p}ai train [hỏi] => [đáp]` | 10s | Hỏi đáp thông minh với AI. Tự động tích hợp dữ liệu huấn luyện riêng của nhóm. Admin có thể cài prompt hoặc dạy AI trả lời riêng cho nhóm. |
 | **info** | `i4` | `{p}info`<br>`{p}info @tag` | 5s | Xem thông tin chi tiết tài khoản Zalo bản thân hoặc người được tag (UID, tên, ngày tham gia...). |
 | **card** | Không | `{p}card`<br>`{p}card @tag` | 5s | Tạo và gửi danh thiếp Zalo liên hệ cho bản thân hoặc người được tag. |
 | **group** | `gr` | `{p}group` | 1s | Xem thông tin chi tiết về nhóm/cộng đồng hiện tại (ID, số thành viên, link nhóm...). |

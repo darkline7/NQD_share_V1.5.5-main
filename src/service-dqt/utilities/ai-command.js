@@ -1,24 +1,20 @@
-import { callGroqAi, isRedfingerSupportGroup } from "../../utils/groq-ai.js";
+import {
+  callGroqAi,
+  isRedfingerSupportGroup,
+  getEffectiveAiPrompt,
+} from "../../utils/groq-ai.js";
 import { removeMention } from "../../utils/format-util.js";
 import { getGlobalPrefix } from "../service.js";
-import { getGroupInfoData } from "../info-service/group-info.js";
+import { getGroupInfoData, getGroupAdmins } from "../info-service/group-info.js";
 import {
   appendConversation,
   clearConversation,
   getAiUserContextKey,
   getConversationHistory,
 } from "../../utils/ai-memory.js";
-
-const AI_COMMAND_PROMPT = [
-  "Bạn là Trợ lý AI Chăm sóc Khách hàng chính thức của website redfinger.vn và nhóm Cộng đồng Redfinger Việt Nam.",
-  "Nhiệm vụ của bạn là tư vấn, giải đáp thắc mắc và hỗ trợ khách hàng về dịch vụ thuê điện thoại đám mây (Android Cloud Phone) treo game 24/7 và mã quà tặng (Redfinger Redeem Code).",
-  "Luôn giữ phong cách lịch sự, thân thiện, nhiệt tình và chuyên nghiệp. Xưng 'Em' (hoặc 'Redfinger Support') và gọi khách hàng là 'Bạn', 'Anh/Chị' hoặc 'Quý khách'. Tuyệt đối không xưng tao-mày, không cộc cằn hay thô lỗ.",
-  "Trả lời ngắn gọn, chính xác, bám sát các chính sách và thông tin chính hãng trên website redfinger.vn.",
-  "Nhắc nhở khách hàng bảo mật mã thẻ 12 ký tự, không gửi mã lên nhóm công khai.",
-  "Nếu khách hàng hỏi về nạp tiền: Nhấn mạnh tối thiểu 50.000 VNĐ, CHỈ chuyển khoản NGÂN HÀNG, TUYỆT ĐỐI KHÔNG dùng MoMo/ZaloPay quét mã QR Shop.",
-  "Nếu khách hàng gặp lỗi 'Điện thoại đám mây đã hết hàng': Giải thích đây là do máy chủ toàn cầu tạm thời hết máy trống, không phải lỗi mã hay lỗi web. Hướng dẫn kiên nhẫn chờ 3-5 phút thử lại hoặc chọn server khác còn máy rồi dùng tính năng Replace (Đổi máy chủ) sau.",
-  "Nếu khách hỏi về cách sử dụng: Hướng dẫn vào app Redfinger hoặc web cloudemulator.vn, vào mục Mã quà tặng trả trước -> Thêm mới hoặc Gia hạn -> Nhập mã 12 ký tự."
-].join(" ");
+import { readGroupSettings, writeGroupSettings } from "../../utils/io-json.js";
+import { isAdmin } from "../../index.js";
+import { learnNewResponse } from "../chat-bot/bot-learning/dqt-bot.js";
 
 function getQuoteText(message) {
   const quote = message.data?.quote;
@@ -57,51 +53,45 @@ function splitMessage(text, maxLength = 1800) {
 }
 
 export async function handleAiCommand(api, message, aliasCommand) {
-  if (message.type === 1) {
-    let groupName = "";
-    try {
-      const groupInfo = await getGroupInfoData(api, message.threadId);
-      groupName = groupInfo?.name || "";
-    } catch (e) {
-      groupName = "";
-    }
-
-    if (!isRedfingerSupportGroup(message.threadId, groupName)) {
-      await api.sendMessage(
-        {
-          msg: "Dạ, Trợ lý AI Chăm sóc Khách hàng Redfinger chỉ hỗ trợ trong nhóm 'Cộng đồng Redfinger Việt Nam' thôi ạ! Quý khách vui lòng đặt câu hỏi tại nhóm cộng đồng để được hỗ trợ nhé. 🙏",
-          quote: message,
-          ttl: 30000,
-        },
-        message.threadId,
-        message.type
-      );
-      return;
-    }
-  }
-
   const prefix = getGlobalPrefix();
   const content = removeMention(message);
-  const question = content.replace(`${prefix}${aliasCommand}`, "").trim();
+  const rawInput = content.replace(new RegExp(`^${prefix}${aliasCommand}\\s*`, "i"), "").trim();
   const quoteText = getQuoteText(message);
   const memoryKey = getAiUserContextKey(message);
   const senderName = message.data?.dName || "người dùng";
+  const senderId = message.data?.uidFrom;
+  const threadId = message.threadId;
+  const isGroup = message.type === 1;
 
-  if (/^(reset|clear|xoa|xóa|forget|quen|quên)$/i.test(question)) {
+  let groupName = "";
+  let groupAdmins = [];
+  if (isGroup) {
+    try {
+      const groupInfo = await getGroupInfoData(api, threadId);
+      groupName = groupInfo?.name || "";
+      groupAdmins = await getGroupAdmins(groupInfo);
+    } catch (e) {
+      groupName = "";
+    }
+  }
+
+  // 1. Lệnh xóa trí nhớ hội thoại cá nhân
+  if (/^(reset|clear|xoa|xóa|forget|quen|quên)$/i.test(rawInput)) {
     clearConversation(memoryKey);
     await api.sendMessage(
       {
-        msg: "Dạ, em đã xóa lịch sử hội thoại trước đó rồi ạ. Quý khách có thể hỏi lại câu hỏi mới nhé!",
+        msg: "Dạ, em đã xóa lịch sử hội thoại trước đó rồi ạ. Bạn có thể hỏi lại câu hỏi mới nhé!",
         quote: message,
         ttl: 60000,
       },
-      message.threadId,
+      threadId,
       message.type
     );
     return;
   }
 
-  if (/^(memory|history|lichsu|lịch sử|nho gi|nhớ gì)$/i.test(question)) {
+  // 2. Xem số lượt hội thoại đang ghi nhớ
+  if (/^(memory|history|lichsu|lịch sử|nho gi|nhớ gì)$/i.test(rawInput)) {
     const historyCount = getConversationHistory(memoryKey).length;
     await api.sendMessage(
       {
@@ -109,40 +99,223 @@ export async function handleAiCommand(api, message, aliasCommand) {
         quote: message,
         ttl: 60000,
       },
-      message.threadId,
+      threadId,
       message.type
     );
     return;
   }
 
-  if (!question && !quoteText) {
+  // 3. Quản lý / Xem / Đổi prompt AI riêng cho nhóm
+  if (/^prompt(\s+.*)?$/i.test(rawInput)) {
+    const promptArg = rawInput.replace(/^prompt\s*/i, "").trim();
+
+    if (!promptArg) {
+      if (isRedfingerSupportGroup(threadId, groupName)) {
+        await api.sendMessage(
+          {
+            msg: `🤖 Nhóm này đang áp dụng: Trợ lý AI Chăm sóc Khách hàng Redfinger Việt Nam (Hỗ trợ tư vấn dịch vụ Cloud Phone, Giftcode, nạp tiền ngân hàng).`,
+            quote: message,
+            ttl: 60000,
+          },
+          threadId,
+          message.type
+        );
+      } else {
+        const groupSettings = readGroupSettings();
+        const customPrompt = groupSettings[threadId]?.aiPrompt?.trim();
+        if (customPrompt) {
+          await api.sendMessage(
+            {
+              msg: `🤖 Nhóm đang dùng Prompt AI huấn luyện riêng:\n"${customPrompt}"\n\n💡 Quản trị viên có thể gõ:\n• ${prefix}${aliasCommand} prompt [nội dung mới] để cập nhật\n• ${prefix}${aliasCommand} prompt reset để xóa về mặc định`,
+              quote: message,
+              ttl: 60000,
+            },
+            threadId,
+            message.type
+          );
+        } else {
+          await api.sendMessage(
+            {
+              msg: `🤖 Nhóm đang dùng Prompt AI mặc định (Trợ lý bạn bè thân thiết).\n\n💡 Quản trị viên nhóm có thể huấn luyện tính cách / prompt riêng bằng lệnh:\n${prefix}${aliasCommand} prompt [nội dung prompt của nhóm]`,
+              quote: message,
+              ttl: 60000,
+            },
+            threadId,
+            message.type
+          );
+        }
+      }
+      return;
+    }
+
+    if (/^reset$/i.test(promptArg)) {
+      if (isGroup && !isAdmin(senderId, threadId, groupAdmins)) {
+        await api.sendMessage(
+          {
+            msg: "⚠️ Chỉ Quản trị viên nhóm hoặc Admin bot mới có quyền đặt lại Prompt AI của nhóm!",
+            quote: message,
+            ttl: 30000,
+          },
+          threadId,
+          message.type
+        );
+        return;
+      }
+      const groupSettings = readGroupSettings();
+      if (groupSettings[threadId]) {
+        delete groupSettings[threadId].aiPrompt;
+        writeGroupSettings(groupSettings);
+      }
+      await api.sendMessage(
+        {
+          msg: "✅ Đã xóa prompt riêng. Nhóm sẽ sử dụng prompt mặc định cùng dữ liệu học của nhóm!",
+          quote: message,
+          ttl: 60000,
+        },
+        threadId,
+        message.type
+      );
+      return;
+    }
+
+    if (isGroup && !isAdmin(senderId, threadId, groupAdmins)) {
+      await api.sendMessage(
+        {
+          msg: "⚠️ Chỉ Quản trị viên nhóm hoặc Admin bot mới có quyền cài đặt Prompt AI cho nhóm!",
+          quote: message,
+          ttl: 30000,
+        },
+        threadId,
+        message.type
+      );
+      return;
+    }
+
+    const groupSettings = readGroupSettings();
+    if (!groupSettings[threadId]) groupSettings[threadId] = {};
+    groupSettings[threadId].aiPrompt = promptArg;
+    writeGroupSettings(groupSettings);
+
     await api.sendMessage(
       {
-        msg:
-          `Quý khách vui lòng nhập nội dung cần Redfinger hỗ trợ.\n` +
-          `Ví dụ: ${prefix}${aliasCommand} giá thuê VIP 1 tháng bao nhiêu?\n` +
-          `Hoặc: ${prefix}${aliasCommand} cách khắc phục lỗi hết hàng khi nhập code`,
+        msg: `✅ Đã cài đặt Prompt huấn luyện AI riêng cho nhóm thành công!\n\n📝 Nội dung:\n"${promptArg}"`,
         quote: message,
         ttl: 60000,
       },
-      message.threadId,
+      threadId,
       message.type
     );
     return;
   }
 
+  // 4. Huấn luyện câu trả lời mới cho AI của nhóm
+  if (/^train\s+/i.test(rawInput)) {
+    if (isGroup && !isAdmin(senderId, threadId, groupAdmins)) {
+      await api.sendMessage(
+        {
+          msg: "⚠️ Chỉ Quản trị viên nhóm hoặc Admin bot mới có quyền huấn luyện AI cho nhóm!",
+          quote: message,
+          ttl: 30000,
+        },
+        threadId,
+        message.type
+      );
+      return;
+    }
+
+    const trainContent = rawInput.replace(/^train\s+/i, "").trim();
+    if (!trainContent.includes("=>")) {
+      await api.sendMessage(
+        {
+          msg: `⚠️ Cú pháp không hợp lệ. Vui lòng sử dụng:\n${prefix}${aliasCommand} train [câu hỏi] => [câu trả lời]`,
+          quote: message,
+          ttl: 30000,
+        },
+        threadId,
+        message.type
+      );
+      return;
+    }
+
+    const [q, ...aParts] = trainContent.split("=>");
+    const question = q.trim();
+    const answer = aParts.join("=>").trim();
+
+    if (!question || !answer) {
+      await api.sendMessage(
+        {
+          msg: `⚠️ Cả câu hỏi và câu trả lời đều không được để trống!`,
+          quote: message,
+          ttl: 30000,
+        },
+        threadId,
+        message.type
+      );
+      return;
+    }
+
+    const success = await learnNewResponse(api, threadId, question, answer);
+    if (success) {
+      await api.sendMessage(
+        {
+          msg: `✅ Đã huấn luyện câu trả lời mới cho AI của nhóm thành công!\n• Câu hỏi: "${question}"\n• Câu trả lời: "${answer}"`,
+          quote: message,
+          ttl: 60000,
+        },
+        threadId,
+        message.type
+      );
+    } else {
+      await api.sendMessage(
+        {
+          msg: `⚠️ Câu trả lời "${answer}" đã tồn tại cho câu hỏi "${question}" trong nhóm này!`,
+          quote: message,
+          ttl: 30000,
+        },
+        threadId,
+        message.type
+      );
+    }
+    return;
+  }
+
+  // 5. Trống câu hỏi -> Hướng dẫn sử dụng
+  if (!rawInput && !quoteText) {
+    await api.sendMessage(
+      {
+        msg:
+          `🤖 Hướng dẫn sử dụng lệnh AI:\n` +
+          `• ${prefix}${aliasCommand} [câu hỏi] : Hỏi đáp trực tiếp với AI.\n` +
+          `• ${prefix}${aliasCommand} prompt : Xem prompt / tính cách AI của nhóm.\n` +
+          `• ${prefix}${aliasCommand} prompt [nội dung] : Cài đặt prompt riêng cho nhóm (Admin).\n` +
+          `• ${prefix}${aliasCommand} prompt reset : Đặt lại prompt mặc định (Admin).\n` +
+          `• ${prefix}${aliasCommand} train [hỏi] => [đáp] : Dạy câu trả lời cho AI nhóm (Admin).\n` +
+          `• ${prefix}${aliasCommand} reset : Xóa lịch sử trò chuyện cá nhân.\n` +
+          `• ${prefix}${aliasCommand} memory : Xem số lượng hội thoại AI đang nhớ.`,
+        quote: message,
+        ttl: 60000,
+      },
+      threadId,
+      message.type
+    );
+    return;
+  }
+
+  // 6. Hỏi đáp AI thông thường
   const prompt = [
     `Người đang hỏi: ${senderName}`,
     quoteText ? `Tin nhắn được reply:\n${quoteText}` : "",
-    question ? `Yêu cầu của người dùng:\n${question}` : "Hãy xử lý tin nhắn được reply một cách hữu ích.",
+    rawInput ? `Yêu cầu của người dùng:\n${rawInput}` : "Hãy xử lý tin nhắn được reply một cách hữu ích.",
   ]
     .filter(Boolean)
     .join("\n\n");
 
   try {
     const history = getConversationHistory(memoryKey);
+    const systemPrompt = getEffectiveAiPrompt(threadId, groupName);
+
     const answer = await callGroqAi(prompt, {
-      systemPrompt: AI_COMMAND_PROMPT,
+      systemPrompt,
       history,
       requireEnabled: false,
       temperature: 0.7,
@@ -161,7 +334,7 @@ export async function handleAiCommand(api, message, aliasCommand) {
           quote: i === 0 ? message : null,
           ttl: 300000,
         },
-        message.threadId,
+        threadId,
         message.type
       );
     }
@@ -169,11 +342,11 @@ export async function handleAiCommand(api, message, aliasCommand) {
     console.error("Lỗi khi xử lý lệnh AI:", error.message);
     await api.sendMessage(
       {
-        msg: "AI đang lỗi hoặc API key Groq chưa dùng được. Thử lại sau nhé.",
+        msg: "AI đang bận hoặc gặp lỗi tạm thời. Bạn vui lòng thử lại sau nhé.",
         quote: message,
         ttl: 60000,
       },
-      message.threadId,
+      threadId,
       message.type
     );
   }

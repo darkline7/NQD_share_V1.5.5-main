@@ -191,6 +191,7 @@ export function initGroupSettings(groupSettings, threadId, nameGroup) {
     learnEnabled: false,
     replyEnabled: false,
     aiEnabled: false,
+    aiPrompt: "",
     onlyText: false,
     memberApprove: false,
     antiNude: false,
