@@ -59,6 +59,7 @@ import { getPermissionCommandName, handleSetCommandActive } from "./manager-comm
 import { scanGroupsWithAction } from "./bot-manager/scan-group.js";
 import { handleDeleteMessage } from "./bot-manager/recent-message.js";
 import { handleSpeedTestCommand } from "../service-dqt/utilities/speedtest.js";
+import { handleVuotLinkCommand } from "../service-dqt/utilities/vuotlink-service.js";
 import { executeWithCircuitBreaker } from "../utils/circuit-breaker.js";
 import {
   handleDailyCommand,
@@ -381,6 +382,12 @@ export async function handleCommandPrivate(api, message) {
             return 0;
           case "speedtest":
             await handleSpeedTestCommand(api, message);
+            return 0;
+          case "vuotlink":
+          case "vl":
+          case "bypass":
+          case "getlink":
+            await handleVuotLinkCommand(api, message, aliasCommand);
             return 0;
           case "info":
             await userInfoCommand(api, message, aliasCommand);
@@ -742,6 +749,13 @@ export async function handleCommand(
 
               case "speedtest":
                 await handleSpeedTestCommand(api, message);
+                break;
+
+              case "vuotlink":
+              case "vl":
+              case "bypass":
+              case "getlink":
+                await handleVuotLinkCommand(api, message, aliasCommand);
                 break;
 
               case "info":

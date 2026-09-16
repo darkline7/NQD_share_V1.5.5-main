@@ -337,6 +337,7 @@ pm2 restart zlbot
 | **group** | `gr` | `{p}group` | 1s | Xem thông tin chi tiết về nhóm/cộng đồng hiện tại (ID, số thành viên, link nhóm...). |
 | **detail** | `uptime` | `{p}detail` | 1s | Xem thông tin chi tiết về trạng thái bot: phiên bản, thời gian hoạt động (uptime), RAM, CPU... |
 | **speedtest** | `spdt` | `{p}speedtest` | 60s | Đo tốc độ mạng Internet (Ping, Download, Upload) của máy chủ bot. |
+| **vuotlink** | `vl`, `bypass`, `getlink` | `{p}vuotlink <link>`<br>`{p}vuotlink` *(reply link)*<br>`{p}vuotlink help`<br>`{p}vuotlink info` | 5s | Tự động vượt qua các trang link rút gọn, đếm ngược và quảng cáo (Linkvertise, Shrinkme, Ouo, Laylink, Link4m...) để lấy link gốc sạch sẽ và an toàn thông qua API VuotLink. Hỗ trợ cờ `--captcha`, `--no-captcha`, `--hops <n>`, `--force`. Admin có lệnh `setkey`, `captcha`, `hops`, `cleancache`. |
 | **sticker** | `stk` | `{p}sticker` | 10s | Chuyển đổi một hình ảnh thành dạng sticker Zalo (cần reply tin nhắn ảnh). |
 | **soundcloud** | `scl`, `ms`, `music` | `{p}soundcloud <từ khóa>`<br>`{p}soundcloud <từ khóa>&&<số lượng>` | 30s | Tìm kiếm và tải bài hát từ SoundCloud gửi vào nhóm theo yêu cầu. |
 | **voice** | Không | `{p}voice <nội dung>` | 5s | Chuyển đổi đoạn văn bản thành file âm thanh giọng nói tiếng Việt gửi vào nhóm. |

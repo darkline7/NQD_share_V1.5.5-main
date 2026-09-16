@@ -91,6 +91,22 @@
       "active": true
     },
     {
+      "name": "vuotlink",
+      "alias": [
+        "vl",
+        "bypass",
+        "getlink"
+      ],
+      "description": "Vượt link rút gọn, đếm ngược, quảng cáo tự động lấy link gốc",
+      "syntax": "{p}vuotlink <link> (hoặc reply tin nhắn)",
+      "permission": "all",
+      "countdown": 5,
+      "icon": "🔗",
+      "type": 1,
+      "author": "Thanh Bình",
+      "active": true
+    },
+    {
       "name": "sticker",
       "description": "Chuyển đổi hình ảnh thành sticker Zalo",
       "syntax": "{p}sticker <cần reply tin nhắn>",

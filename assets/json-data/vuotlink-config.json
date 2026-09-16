@@ -1,0 +1,8 @@
+{
+  "apiKey": "",
+  "apiUrl": "https://browser-agent.hommi.io.vn/api/v1/bypass",
+  "autoSolveCaptcha": true,
+  "maxHops": 10,
+  "timeoutMs": 90000,
+  "lastBalance": null
+}
