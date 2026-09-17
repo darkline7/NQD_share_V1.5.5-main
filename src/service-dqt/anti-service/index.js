@@ -13,7 +13,8 @@ const antiState = {
     badWords: [],
     linkRegex: "",
     violations: {},
-    violationsNude: {}
+    violationsNude: {},
+    violationsLink: {}
   },
   hasChanges: false
 };
@@ -23,6 +24,9 @@ export async function loadAntiConfig() {
   try {
     const data = await fs.readFile(configPath, "utf8");
     antiState.data = JSON.parse(data);
+    if (!antiState.data.violationsLink) {
+      antiState.data.violationsLink = {};
+    }
     console.log(chalk.green("Đã tải xong config anti service"));
   } catch (error) {
     console.error("Lỗi khi đọc file config anti:", error);

@@ -32,10 +32,10 @@ function isBotAdmin(userId) {
 export function getVuotLinkConfig() {
   const defaultConfig = {
     apiKey: process.env.VUOTLINK_API_KEY || "",
-    apiUrl: "https://browser-agent.hommi.io.vn/api/v1/bypass",
+    apiUrl: "https://browser-agent.hommi.io.vn/api/v1/browser",
     autoSolveCaptcha: true,
     maxHops: 10,
-    timeoutMs: 90000,
+    timeoutMs: 300000,
     lastBalance: null,
   };
 
@@ -152,8 +152,14 @@ async function callVuotLinkApi({ url, autoSolveCaptcha, maxHops }) {
     };
   }
 
-  const endpoint = config.apiUrl || "https://browser-agent.hommi.io.vn/api/v1/bypass";
-  const timeoutMs = config.timeoutMs || 90000;
+  // Luôn chuyển sang endpoint /api/v1/browser để stream dữ liệu
+  // Việc stream dữ liệu giữ kết nối liên tục, tránh hoàn toàn lỗi Cloudflare Error 524 Timeout (100s-120s)
+  let endpoint = config.apiUrl || "https://browser-agent.hommi.io.vn/api/v1/browser";
+  if (endpoint.endsWith("/api/v1/bypass")) {
+    endpoint = endpoint.replace("/api/v1/bypass", "/api/v1/browser");
+  }
+
+  const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : 300000;
 
   try {
     const response = await axios.post(
@@ -168,26 +174,93 @@ async function callVuotLinkApi({ url, autoSolveCaptcha, maxHops }) {
           "Content-Type": "application/json",
           "x-api-key": apiKey.trim(),
         },
+        responseType: "stream",
         timeout: timeoutMs,
       }
     );
 
-    const data = response.data;
+    return new Promise((resolve) => {
+      let buffer = "";
+      let lastResult = null;
+      let lastError = null;
 
-    // Lưu lại số dư mới nhất nếu API trả về
-    if (typeof data.remaining_balance === "number") {
-      saveVuotLinkConfig({ lastBalance: data.remaining_balance });
-    }
+      response.data.on("data", (chunk) => {
+        buffer += chunk.toString();
+        const lines = buffer.split("\n");
+        buffer = lines.pop(); // Giữ lại dòng chưa hoàn chỉnh ở cuối
 
-    return {
-      success: true,
-      data: data,
-    };
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (parsed.event === "result") {
+              lastResult = parsed;
+            } else if (parsed.event === "error") {
+              lastError = parsed;
+            }
+          } catch {}
+        }
+      });
+
+      response.data.on("end", () => {
+        if (buffer.trim()) {
+          try {
+            const parsed = JSON.parse(buffer.trim());
+            if (parsed.event === "result") lastResult = parsed;
+            if (parsed.event === "error") lastError = parsed;
+          } catch {}
+        }
+
+        if (lastResult) {
+          // Lưu lại số dư mới nhất nếu có
+          if (typeof lastResult.remaining_balance === "number") {
+            saveVuotLinkConfig({ lastBalance: lastResult.remaining_balance });
+          }
+          resolve({
+            success: true,
+            data: lastResult,
+          });
+        } else if (lastError) {
+          const errDetail = lastError.detail || lastError.message || lastError.error || "Workflow thất bại";
+          resolve({
+            success: false,
+            code: lastError.error_type || "WORKFLOW_ERROR",
+            message: `Vượt link không thành công: ${errDetail}`,
+            data: lastError,
+          });
+        } else {
+          resolve({
+            success: false,
+            code: "NO_RESULT",
+            message: "Máy chủ đã kết thúc tiến trình nhưng không trả về kết quả vượt link.",
+          });
+        }
+      });
+
+      response.data.on("error", (streamErr) => {
+        resolve({
+          success: false,
+          code: "STREAM_ERROR",
+          message: `Lỗi luồng dữ liệu từ máy chủ VuotLink: ${streamErr.message}`,
+        });
+      });
+    });
   } catch (error) {
     if (error.response) {
       const status = error.response.status;
-      const resData = error.response.data || {};
-      const detail = resData.detail || resData.message || "";
+      let detail = "";
+      try {
+        if (typeof error.response.data?.read === "function") {
+          const errChunk = error.response.data.read();
+          if (errChunk) {
+            const parsedErr = JSON.parse(errChunk.toString());
+            detail = parsedErr.detail || parsedErr.message || "";
+          }
+        } else if (typeof error.response.data === "object") {
+          detail = error.response.data.detail || error.response.data.message || "";
+        }
+      } catch {}
 
       if (status === 401) {
         return {
@@ -217,6 +290,13 @@ async function callVuotLinkApi({ url, autoSolveCaptcha, maxHops }) {
           message: `Vượt link thất bại qua hệ thống workflow (Yêu cầu đã được tự động hoàn phí). Chi tiết: ${detail || "Workflow failed"}`,
         };
       }
+      if (status === 524) {
+        return {
+          success: false,
+          code: 524,
+          message: "Máy chủ mất quá nhiều thời gian để xử lý và gây nghẽn Cloudflare (Error 524). Vui lòng thử lại sau.",
+        };
+      }
 
       return {
         success: false,
@@ -226,10 +306,11 @@ async function callVuotLinkApi({ url, autoSolveCaptcha, maxHops }) {
     }
 
     if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
+      const timeoutSec = Math.round(timeoutMs / 1000);
       return {
         success: false,
         code: "TIMEOUT",
-        message: "Hết thời gian chờ phản hồi từ máy chủ VuotLink (Timeout 90s). Link này có thể cần nhiều bước chuyển hướng phức tạp hoặc web nguồn phản hồi chậm.",
+        message: `Hết thời gian chờ phản hồi từ máy chủ VuotLink (${timeoutSec}s). Link này có thể cần nhiều bước chuyển hướng phức tạp hoặc web nguồn phản hồi quá chậm.`,
       };
     }
 
@@ -275,8 +356,9 @@ export async function handleVuotLinkCommand(api, message, aliasCommand) {
       `   • ${prefix}${aliasCommand} setkey <key>       : Cài đặt / cập nhật API key\n` +
       `   • ${prefix}${aliasCommand} captcha <on|off>   : Bật/tắt tự động giải captcha\n` +
       `   • ${prefix}${aliasCommand} hops <1-30>        : Đổi số bước tối đa mặc định\n` +
+      `   • ${prefix}${aliasCommand} timeout <giây>     : Đổi thời gian chờ tối đa (30-1800s)\n` +
       `   • ${prefix}${aliasCommand} cleancache         : Xóa bộ nhớ cache link\n\n` +
-      `🌐 Nền tảng hỗ trợ: Linkvertise, Shrinkme, Ouo, Laylink, Link4m, Bitly, Tinyurl, layma, yeumoney và hàng chục nền tảng khác!`;
+      `🌐 Nền tảng hỗ trợ: Linkvertise, Shrinkme, Ouo, Laylink, Link4m, Bitly, Tinyurl, layma, ktools, yeumoney và hàng chục nền tảng khác!`;
 
     await api.sendMessage(
       {
@@ -397,7 +479,31 @@ export async function handleVuotLinkCommand(api, message, aliasCommand) {
     return;
   }
 
-  // 6. Lệnh Xóa cache: /vuotlink cleancache
+  // 6. Lệnh Đổi timeout (Chỉ Admin): /vuotlink timeout <giây>
+  if (subCommand === "timeout") {
+    if (!isBotAdmin(senderId)) {
+      await sendMessageWarningRequest(api, message, {
+        caption: "❌ Bạn Không có quyền thực hiện lệnh này! Chỉ Admin Bot mới được thay đổi cài đặt.",
+      }, 30000);
+      return;
+    }
+
+    const sec = parseInt(parts[1], 10);
+    if (isNaN(sec) || sec < 30 || sec > 1800) {
+      await sendMessageWarningRequest(api, message, {
+        caption: "Vui lòng nhập thời gian timeout hợp lệ từ 30 đến 1800 giây (30s - 30 phút)! Ví dụ: /vuotlink timeout 300",
+      }, 30000);
+      return;
+    }
+
+    saveVuotLinkConfig({ timeoutMs: sec * 1000 });
+    await sendMessageCompleteRequest(api, message, {
+      caption: `✅ Đã cập nhật thời gian timeout tối đa thành ${sec} giây!`,
+    }, 60000);
+    return;
+  }
+
+  // 7. Lệnh Xóa cache: /vuotlink cleancache
   if (subCommand === "cleancache") {
     if (!isBotAdmin(senderId)) {
       await sendMessageWarningRequest(api, message, {
@@ -414,7 +520,7 @@ export async function handleVuotLinkCommand(api, message, aliasCommand) {
     return;
   }
 
-  // 7. Xử lý vượt link chính
+  // 8. Xử lý vượt link chính
   // Trích xuất flag tùy chọn: --captcha, --no-captcha, --hops <n>, --force / --nocache
   let optCaptcha = undefined;
   if (rawArgs.includes("--captcha")) optCaptcha = true;
@@ -516,10 +622,10 @@ export async function handleVuotLinkCommand(api, message, aliasCommand) {
 
   activeUsers.add(senderId);
 
-  // Gửi thông báo bắt đầu xử lý với TTL ngắn để tự biến mất
+  // Gửi thông báo bắt đầu xử lý với TTL 3 phút
   await sendMessageProcessingRequest(api, message, {
-    caption: `⏳ Đang gửi yêu cầu vượt link đến VuotLink API, vui lòng đợi trong giây lát...\n🔗 Link: ${targetUrl}`,
-  }, 25000).catch(() => null);
+    caption: `⏳ Đang gửi yêu cầu vượt link đến VuotLink API...\n(Một số link phức tạp nhiều bước có thể mất từ 1 - 3 phút, vui lòng kiên nhẫn)\n🔗 Link: ${targetUrl}`,
+  }, 180000).catch(() => null);
 
   const startTime = Date.now();
 
@@ -555,7 +661,11 @@ export async function handleVuotLinkCommand(api, message, aliasCommand) {
     const title = data.title || "Không có";
     const workflow = data.workflow || "Tự động";
     const hopsUsed = data.hops_used ?? (Array.isArray(data.solved_workflows) ? data.solved_workflows.length : 1);
-    const totalCost = data.total_cost !== undefined ? `${data.total_cost} xu` : "N/A";
+    const totalCost = data.total_cost !== undefined
+      ? `${data.total_cost} xu`
+      : Array.isArray(data.solved_workflows) && data.solved_workflows.length > 0
+        ? `${data.solved_workflows.reduce((sum, w) => sum + (w.price || 0), 0)} xu`
+        : "N/A";
     const remainingBalance = data.remaining_balance !== undefined
       ? `${Number(data.remaining_balance).toLocaleString("vi-VN")} xu`
       : "N/A";
@@ -571,6 +681,9 @@ export async function handleVuotLinkCommand(api, message, aliasCommand) {
       });
     }
 
+    const isUrlResult = /^https?:\/\//i.test(finalUrl);
+    const resultLabel = isUrlResult ? "🚀 LINK ĐÍCH (KẾT QUẢ):" : "🚀 KẾT QUẢ / KEY NHẬN ĐƯỢC:";
+
     let successMsg =
       `🎉 ─── VƯỢT LINK THÀNH CÔNG (${elapsedSeconds}s) ─── 🎉\n\n` +
       `📌 Tiêu đề     : ${title}\n` +
@@ -578,8 +691,8 @@ export async function handleVuotLinkCommand(api, message, aliasCommand) {
       `🔄 Số bước     : ${hopsUsed} hop\n` +
       `💰 Chi phí     : ${totalCost} (Còn lại: ${remainingBalance})\n` +
       `📥 Link gốc    : ${data.requested_url || targetUrl}\n\n` +
-      `🚀 LINK ĐÍCH (KẾT QUẢ):\n` +
-      `👉 ${finalUrl || "Không tìm thấy URL đích"}`;
+      `${resultLabel}\n` +
+      `👉 ${finalUrl || "Không tìm thấy kết quả"}`;
 
     if (data.hops_exceeded) {
       successMsg += `\n\n⚠️ Chú ý: Đã đạt giới hạn số bước chuyển hướng tối đa (hops_exceeded = true).`;

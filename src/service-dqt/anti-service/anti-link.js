@@ -1,7 +1,7 @@
 import { MessageMention, MessageType } from "zlbotdqt";
 import { getBotId } from "../../index.js";
 import { sendMessageStateQuote } from "../chat-zalo/chat-style/chat-style.js";
-import { createBlockSpamLinkImage } from "../../utils/canvas/event-image.js";
+import { createBlockSpamLinkImage, createKickImage } from "../../utils/canvas/event-image.js";
 import { clearImagePath } from "../../utils/canvas/index.js";
 import { getGroupInfoData } from "../info-service/group-info.js";
 import { getUserInfoData } from "../info-service/user-info.js";
@@ -9,6 +9,90 @@ import { isInWhiteList } from "./white-list.js";
 import { removeMention } from "../../utils/format-util.js";
 import { getAntiState } from "./index.js";
 import { scanQRCode } from "../utilities/qr-scan.js";
+import schedule from "node-schedule";
+
+export const MAX_LINK_VIOLATIONS_PER_DAY = 5;
+
+/**
+ * Lấy chuỗi ngày hiện tại theo giờ Việt Nam (UTC+7): YYYY-MM-DD
+ */
+export function getVietnamDateString() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" });
+}
+
+/**
+ * Ghi nhận và tăng số lần vi phạm gửi link trong ngày của thành viên trong nhóm
+ */
+export function recordLinkViolation(threadId, senderId, senderName) {
+  const antiState = getAntiState();
+  if (!antiState.data.violationsLink) {
+    antiState.data.violationsLink = {};
+  }
+  const violationsLink = antiState.data.violationsLink;
+  if (!violationsLink[threadId]) {
+    violationsLink[threadId] = {};
+  }
+
+  const today = getVietnamDateString();
+  const current = violationsLink[threadId][senderId];
+
+  // Nếu chưa có vi phạm hoặc đã qua ngày mới, đặt lại lượt vi phạm về 1
+  if (!current || current.date !== today) {
+    violationsLink[threadId][senderId] = {
+      count: 1,
+      date: today,
+      lastTime: Date.now(),
+      name: senderName,
+    };
+  } else {
+    current.count += 1;
+    current.lastTime = Date.now();
+    current.name = senderName;
+  }
+
+  antiState.hasChanges = true;
+  return violationsLink[threadId][senderId];
+}
+
+/**
+ * Lấy thông tin vi phạm gửi link trong ngày hiện tại
+ */
+export function getLinkViolation(threadId, senderId) {
+  const antiState = getAntiState();
+  const today = getVietnamDateString();
+  const current = antiState?.data?.violationsLink?.[threadId]?.[senderId];
+  if (current && current.date === today) {
+    return current;
+  }
+  return { count: 0, date: today, name: "" };
+}
+
+/**
+ * Tự động reset lượt vi phạm gửi link lúc 00:00 hàng ngày (qua ngày mới)
+ */
+function startMidnightResetSchedule() {
+  const jobName = "resetAntiLinkDailyViolations";
+  const existingJob = schedule.scheduledJobs[jobName];
+  if (existingJob) {
+    existingJob.cancel();
+  }
+
+  schedule.scheduleJob(jobName, "0 0 * * *", () => {
+    try {
+      const antiState = getAntiState();
+      if (antiState?.data?.violationsLink) {
+        antiState.data.violationsLink = {};
+        antiState.hasChanges = true;
+        console.log("[AntiLink] Đã qua ngày mới (00:00): Reset toàn bộ lượt vi phạm gửi link!");
+      }
+    } catch (err) {
+      console.error("[AntiLink] Lỗi khi reset lượt vi phạm ngày mới:", err);
+    }
+  });
+}
+
+// Khởi động schedule reset lúc nửa đêm
+startMidnightResetSchedule();
 
 async function loadLinkRegex() {
   try {
@@ -26,9 +110,6 @@ async function loadLinkRegex() {
 
 const linkRegex = await loadLinkRegex();
 const URL_PARSE_REGEX = /(?:https?:\/\/|www\.)\S+|(?<!\w)[a-zA-Z0-9-]+\.(?:[a-zA-Z]{2,})(?:\/\S*)?(?!\w)/gi;
-
-let linkSendCount = {}; // Đếm số link đã gửi của mỗi người dùng
-let linkSendTime = {}; // Thời gian gửi link của mỗi người dùng
 
 function checkLink(content) {
   if (!content) return false;
@@ -229,9 +310,52 @@ export async function handleAntiLinkCommand(
       `- Chế độ: ${prettyMode}`,
       `- Domain chặn (on [domain]): ${currentDomain || "(không cấu hình)"}`,
       `- Domain cho phép (allow): ${currentAllowDomains.length > 0 ? currentAllowDomains.join(", ") : "(không cấu hình)"}`,
+      `- Giới hạn vi phạm: Tối đa 5 lần/ngày (đạt 5/5 sẽ kick khỏi nhóm, reset vào 00:00 hàng ngày)`,
     ].join("\n");
     await sendMessageStateQuote(api, message, detail, true, 300000);
     return false;
+  }
+
+  if (status === "reset") {
+    const mentions = message.data?.mentions || [];
+    const antiState = getAntiState();
+    if (!antiState.data.violationsLink) {
+      antiState.data.violationsLink = {};
+    }
+
+    if (mentions.length > 0) {
+      const resetNames = [];
+      for (const m of mentions) {
+        if (antiState.data.violationsLink[threadId]?.[m.uid]) {
+          delete antiState.data.violationsLink[threadId][m.uid];
+          resetNames.push(m.dName || m.uid);
+        }
+      }
+      antiState.hasChanges = true;
+      await sendMessageStateQuote(
+        api,
+        message,
+        resetNames.length > 0
+          ? `Đã reset lượt vi phạm link cho: ${resetNames.join(", ")}.`
+          : "Thành viên được tag hiện không có lượt vi phạm link nào hôm nay.",
+        true,
+        60000
+      );
+      return true;
+    }
+
+    if (antiState.data.violationsLink[threadId]) {
+      antiState.data.violationsLink[threadId] = {};
+      antiState.hasChanges = true;
+    }
+    await sendMessageStateQuote(
+      api,
+      message,
+      "Đã reset toàn bộ lượt vi phạm gửi link trong nhóm về 0/5.",
+      true,
+      60000
+    );
+    return true;
   }
 
   if (status === "test") {
@@ -433,7 +557,7 @@ export async function handleAntiLinkCommand(
     await sendMessageStateQuote(
       api,
       message,
-      "Cú pháp AntiLink: .antilink on [domain] | .antilink allow <d1,d2> | .antilink allow add <d1,d2> | .antilink allow remove <d1,d2> | .antilink allow show | .antilink allow clear | .antilink vip <domain> | .antilink test <link> | .antilink list | .antilink status | .antilink off",
+      "Cú pháp AntiLink: .antilink on [domain] | .antilink allow <d1,d2> | .antilink allow add <d1,d2> | .antilink allow remove <d1,d2> | .antilink allow show | .antilink allow clear | .antilink vip <domain> | .antilink test <link> | .antilink reset [@tag|all] | .antilink list | .antilink status | .antilink off",
       false,
       300000
     );
@@ -526,47 +650,129 @@ async function updateLinkCount(
   botId,
   isAdminBox
 ) {
-  if (!linkSendCount[senderId]) {
-    linkSendCount[senderId] = 0;
-    linkSendTime[senderId] = Date.now();
-  }
-
-  linkSendCount[senderId]++;
-
   if (isAdminBox && senderId !== botId) {
     return;
   }
 
-  if (Date.now() - linkSendTime[senderId] < 60 * 1000) {
-    if (linkSendCount[senderId] > 2) {
-      await blockUser(api, message, threadId, senderId, senderName);
-      return;
-    }
-  } else {
-    linkSendCount[senderId] = 1;
-    linkSendTime[senderId] = Date.now();
-  }
+  // Ghi nhận lượt vi phạm trong ngày
+  const violation = recordLinkViolation(threadId, senderId, senderName);
+  const count = violation.count;
 
-  await sendWarningMessage(api, message, senderId, senderName, linkSendCount[senderId]);
+  // Nếu vi phạm đủ MAX_LINK_VIOLATIONS_PER_DAY (5/5) trong ngày -> Kick thành viên
+  if (count >= MAX_LINK_VIOLATIONS_PER_DAY) {
+    await kickViolatorUser(api, message, threadId, senderId, senderName, count);
+  } else {
+    // Cảnh cáo các lần 1, 2, 3, 4
+    await sendWarningMessage(api, message, threadId, senderId, senderName, count);
+  }
 }
 
-async function blockUser(api, message, threadId, senderId, senderName) {
+async function kickViolatorUser(api, message, threadId, senderId, senderName, count) {
+  let kickSuccess = false;
+
   try {
-    await api.blockUsers(threadId, [senderId]);
+    const result = await api.removeUserFromGroup(threadId, [senderId]);
+    if (!result?.errorMembers || result.errorMembers.length === 0) {
+      kickSuccess = true;
+    }
+  } catch (error) {
+    console.error(`[AntiLink] Không thể kick ${senderName} (${senderId}) bằng removeUserFromGroup:`, error.message);
+  }
+
+  if (!kickSuccess) {
+    try {
+      await api.blockUsers(threadId, [senderId]);
+      kickSuccess = true;
+    } catch (error) {
+      console.error(`[AntiLink] Không thể chặn ${senderName} (${senderId}) bằng blockUsers:`, error.message);
+    }
+  }
+
+  let imagePath = null;
+  try {
     const groupInfo = await getGroupInfoData(api, threadId);
     const userInfo = await getUserInfoData(api, senderId);
-    const imagePath = await createBlockSpamLinkImage(
-      userInfo,
-      groupInfo.name,
-      groupInfo.groupType,
-      userInfo.gender
+    if (typeof createKickImage === "function") {
+      imagePath = await createKickImage(
+        userInfo,
+        groupInfo.name,
+        groupInfo.type || groupInfo.groupType,
+        userInfo.genderId !== undefined ? userInfo.genderId : userInfo.gender,
+        "Bot AntiLink",
+        true
+      );
+    }
+  } catch (err) {
+    try {
+      const groupInfo = await getGroupInfoData(api, threadId);
+      const userInfo = await getUserInfoData(api, senderId);
+      if (typeof createBlockSpamLinkImage === "function") {
+        imagePath = await createBlockSpamLinkImage(
+          userInfo,
+          groupInfo.name,
+          groupInfo.groupType,
+          userInfo.gender
+        );
+      }
+    } catch {}
+  }
+
+  const kickNotice =
+    `🚫 THÀNH VIÊN ĐÃ BỊ KICK KHỎI NHÓM! 🚫\n\n` +
+    `👤 Người vi phạm: ${senderName}\n` +
+    `⚠️ Lý do: Vi phạm gửi liên kết (${count}/${MAX_LINK_VIOLATIONS_PER_DAY}) lần trong ngày.\n` +
+    `⏰ Lượt vi phạm tự động làm mới (reset về 0) vào 00:00 hàng ngày.`;
+
+  try {
+    await api.sendMessage(
+      {
+        msg: kickNotice,
+        attachments: imagePath ? [imagePath] : [],
+        quote: message,
+      },
+      threadId,
+      MessageType.GroupMessage
     );
+  } catch (error) {
+    console.error("[AntiLink] Lỗi gửi thông báo kick:", error.message);
+  }
+
+  if (imagePath) {
+    await clearImagePath(imagePath);
+  }
+
+  try {
+    await api.sendMessage(
+      {
+        msg: `Chào [ ${senderName} ]\nBạn đã bị KICK khỏi nhóm vì gửi link vi phạm ${count}/${MAX_LINK_VIOLATIONS_PER_DAY} lần trong ngày hôm nay!`,
+        quote: message,
+      },
+      senderId,
+      MessageType.DirectMessage
+    );
+  } catch (error) {
+    console.error(`Không thể gửi tin nhắn riêng tới ${senderId}:`, error.message);
+  }
+}
+
+async function sendWarningMessage(api, message, threadId, senderId, senderName, count) {
+  try {
+    const prefixText = `⚠️ CẢNH CÁO GỬI LINK (${count}/${MAX_LINK_VIOLATIONS_PER_DAY})\n\n👤 Thành viên: `;
+    const caption =
+      `${prefixText}${senderName}\n` +
+      `🚫 Tin nhắn chứa liên kết đã bị xóa do nhóm đang bật AntiLink.\n` +
+      `⚠️ Cảnh cáo lần: ${count}/${MAX_LINK_VIOLATIONS_PER_DAY} trong ngày.\n` +
+      `⚡ Đạt ${MAX_LINK_VIOLATIONS_PER_DAY}/${MAX_LINK_VIOLATIONS_PER_DAY} lần vi phạm sẽ tự động bị KICK khỏi nhóm!\n` +
+      `🔄 Lượt vi phạm tự động làm mới vào 00:00 mỗi ngày.`;
 
     await api.sendMessage(
       {
-        msg: "",
-        attachments: imagePath ? [imagePath] : [],
+        msg: caption,
+        mentions: [
+          MessageMention(senderId, senderName.length, prefixText.length),
+        ],
         quote: message,
+        ttl: 120000,
       },
       threadId,
       MessageType.GroupMessage
@@ -575,52 +781,16 @@ async function blockUser(api, message, threadId, senderId, senderName) {
     try {
       await api.sendMessage(
         {
-          msg: `Chào [ ${senderName} ]\nBạn đã bị chặn khỏi nhóm vì gửi quá nhiều link!`,
-          attachments: imagePath ? [imagePath] : [],
+          msg: `Liên kết của bạn đã bị xóa do vi phạm chính sách AntiLink (${count}/${MAX_LINK_VIOLATIONS_PER_DAY} lần hôm nay).`,
           quote: message,
         },
         senderId,
         MessageType.DirectMessage
       );
     } catch (error) {
-      console.error(`Không thể gửi tin nhắn tới ${senderId}:`, error.message);
+      console.error(`Không thể gửi tin nhắn riêng tới ${senderId}:`, error.message);
     }
-
-    await clearImagePath(imagePath);
-  } catch {
-    console.error(`Không thể chặn người dùng ${senderName}`);
-  }
-}
-
-async function sendWarningMessage(api, message, senderId, senderName, count) {
-  try {
-    let caption = `⚠️ Nhắc nhở ${senderName}: nhóm đang bật AntiLink, vui lòng không gửi liên kết không phù hợp.`;
-    switch (count) {
-      case 2:
-        caption = `⚠️ ${senderName}, bạn đã vi phạm lần 2. Nếu tiếp tục gửi link sai quy định, bot sẽ tự động chặn.`;
-        break;
-    }
-    await api.sendMessage(
-      {
-        msg: caption,
-        mentions: [
-          MessageMention(senderId, senderName.length, "⚠️ Cảnh cáo ".length),
-        ],
-        quote: message,
-        ttl: 300000,
-      },
-      message.threadId,
-      MessageType.GroupMessage
-    );
-    await api.sendMessage(
-      {
-        msg: `Liên kết của bạn đã bị xóa do không đúng chính sách AntiLink của nhóm.`,
-        quote: message,
-      },
-      senderId,
-      MessageType.DirectMessage
-    );
   } catch (error) {
-    console.error(`Không thể gửi tin nhắn tới ${senderId}:`, error.message);
+    console.error(`[AntiLink] Lỗi gửi cảnh báo vi phạm link:`, error.message);
   }
 }
